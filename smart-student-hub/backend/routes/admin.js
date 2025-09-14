@@ -7,6 +7,7 @@ const router = express.Router();
 // Get admin dashboard data
 router.get('/dashboard', auth, isAdmin, async (req, res) => {
   try {
+    const pool = getPool();
     // Get overall statistics
     const statsResult = await pool.query(`
       SELECT 
@@ -40,13 +41,14 @@ router.get('/dashboard', auth, isAdmin, async (req, res) => {
         u.first_name as student_first_name,
         u.last_name as student_last_name,
         ac.name as category_name,
-        f.first_name as approved_by_name,
-        f.last_name as approved_by_last_name
+        fu.first_name as approved_by_name,
+        fu.last_name as approved_by_last_name
       FROM activities a
       JOIN students s ON a.student_id = s.id
       JOIN users u ON s.user_id = u.id
       LEFT JOIN activity_categories ac ON a.category = ac.name
       LEFT JOIN faculty f ON a.approved_by = f.id
+      LEFT JOIN users fu ON f.user_id = fu.id
       ORDER BY a.created_at DESC
       LIMIT 10
     `);

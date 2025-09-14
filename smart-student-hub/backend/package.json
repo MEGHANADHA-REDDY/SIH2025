@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A comprehensive Node.js/Express backend API for the Smart Student Hub platform, providing centralized student achievement management.",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",

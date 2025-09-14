@@ -318,9 +318,12 @@ export default function RecruiterDashboard() {
               <div key={student.id} className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <button
+                      onClick={() => router.push(`/profile/${student.id}`)}
+                      className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors text-left"
+                    >
                       {student.first_name} {student.last_name}
-                    </h3>
+                    </button>
                     <p className="text-sm text-gray-500">ID: {student.student_id}</p>
                   </div>
                   <div className="flex items-center space-x-1">

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { pool } = require('../config/database');
+const { getPool } = require('../config/database');
 
 const auth = async (req, res, next) => {
   try {
@@ -15,6 +15,7 @@ const auth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
     // Check if user still exists and is active
+    const pool = getPool();
     const userResult = await pool.query(
       'SELECT id, email, role, is_active FROM users WHERE id = $1',
       [decoded.userId]

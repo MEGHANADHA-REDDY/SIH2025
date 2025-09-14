@@ -1,7 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs').promises;
+const fsSync = require('fs');
 const { auth, isStudent, isFaculty } = require('../middleware/auth');
 const { getPool } = require('../config/database');
 
@@ -11,8 +12,8 @@ const router = express.Router();
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, '../uploads/certificates');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
+    if (!fsSync.existsSync(uploadPath)) {
+      fsSync.mkdirSync(uploadPath, { recursive: true });
     }
     cb(null, uploadPath);
   },
@@ -62,6 +63,7 @@ router.post('/upload', auth, isStudent, upload.single('certificate'), async (req
     }
 
     // Get student ID
+    const pool = getPool();
     const studentResult = await pool.query(
       'SELECT id FROM students WHERE user_id = $1',
       [userId]
@@ -118,6 +120,7 @@ router.post('/upload', auth, isStudent, upload.single('certificate'), async (req
 router.get('/', auth, async (req, res) => {
   try {
     const { status, category, studentId, page = 1, limit = 10 } = req.query;
+    const pool = getPool();
 
     // Build query
     let query = `
@@ -127,13 +130,14 @@ router.get('/', auth, async (req, res) => {
         u.first_name as student_first_name,
         u.last_name as student_last_name,
         ac.name as category_name,
-        f.first_name as approved_by_name,
-        f.last_name as approved_by_last_name
+        fu.first_name as approved_by_name,
+        fu.last_name as approved_by_last_name
       FROM activities a
       JOIN students s ON a.student_id = s.id
       JOIN users u ON s.user_id = u.id
       LEFT JOIN activity_categories ac ON a.category = ac.name
       LEFT JOIN faculty f ON a.approved_by = f.id
+      LEFT JOIN users fu ON f.user_id = fu.id
       WHERE 1=1
     `;
     
@@ -227,15 +231,22 @@ router.get('/', auth, async (req, res) => {
 router.put('/:id/approve', auth, isFaculty, async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, rejectionReason } = req.body;
+    const { action, status, rejectionReason } = req.body;
     const facultyId = req.user.userId;
+    const pool = getPool();
+
+    // Handle both new format (action) and old format (status) for compatibility
+    const finalStatus = action || status;
 
     // Validate status
-    if (!['approved', 'rejected'].includes(status)) {
+    if (!['approve', 'approved', 'reject', 'rejected'].includes(finalStatus)) {
       return res.status(400).json({
-        message: 'Status must be either approved or rejected'
+        message: 'Action must be either approve or reject'
       });
     }
+
+    // Normalize status
+    const normalizedStatus = finalStatus === 'approve' ? 'approved' : finalStatus === 'reject' ? 'rejected' : finalStatus;
 
     // Get faculty ID from faculty table
     const facultyResult = await pool.query(
@@ -258,7 +269,7 @@ router.put('/:id/approve', auth, isFaculty, async (req, res) => {
           rejection_reason = $3, updated_at = CURRENT_TIMESTAMP
       WHERE id = $4
       RETURNING *
-    `, [status, facultyDbId, rejectionReason, id]);
+    `, [normalizedStatus, facultyDbId, rejectionReason, id]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({
@@ -267,7 +278,7 @@ router.put('/:id/approve', auth, isFaculty, async (req, res) => {
     }
 
     res.json({
-      message: `Activity ${status} successfully`,
+      message: `Activity ${normalizedStatus} successfully`,
       data: result.rows[0]
     });
 
@@ -283,6 +294,7 @@ router.put('/:id/approve', auth, isFaculty, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const { id } = req.params;
+    const pool = getPool();
 
     const result = await pool.query(`
       SELECT 
@@ -291,13 +303,14 @@ router.get('/:id', auth, async (req, res) => {
         u.first_name as student_first_name,
         u.last_name as student_last_name,
         ac.name as category_name,
-        f.first_name as approved_by_name,
-        f.last_name as approved_by_last_name
+        fu.first_name as approved_by_name,
+        fu.last_name as approved_by_last_name
       FROM activities a
       JOIN students s ON a.student_id = s.id
       JOIN users u ON s.user_id = u.id
       LEFT JOIN activity_categories ac ON a.category = ac.name
       LEFT JOIN faculty f ON a.approved_by = f.id
+      LEFT JOIN users fu ON f.user_id = fu.id
       WHERE a.id = $1
     `, [id]);
 
@@ -321,11 +334,12 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Update activity (student only)
-router.put('/:id', auth, isStudent, async (req, res) => {
+router.put('/:id', auth, isStudent, upload.single('certificate'), async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.userId;
     const { title, description, activityType, category, startDate, endDate, organization } = req.body;
+    const pool = getPool();
 
     // Check if activity belongs to student
     const studentResult = await pool.query(
@@ -360,14 +374,57 @@ router.put('/:id', auth, isStudent, async (req, res) => {
       });
     }
 
-    // Update activity
-    const result = await pool.query(`
-      UPDATE activities 
-      SET title = $1, description = $2, activity_type = $3, category = $4,
-          start_date = $5, end_date = $6, organization = $7, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $8 AND student_id = $9
-      RETURNING *
-    `, [title, description, activityType, category, startDate, endDate, organization, id, studentId]);
+    // Handle certificate update if new file is provided
+    let certificateUrl = null;
+    if (req.file) {
+      // Get current activity to potentially clean up old certificate
+      const currentActivity = await pool.query(
+        'SELECT certificate_url FROM activities WHERE id = $1',
+        [id]
+      );
+      
+      const oldCertificateUrl = currentActivity.rows[0]?.certificate_url;
+      
+      // Set new certificate URL
+      certificateUrl = `/uploads/${req.file.filename}`;
+      
+      // Clean up old certificate file if it exists and is different
+      if (oldCertificateUrl && oldCertificateUrl !== certificateUrl) {
+        const oldFilePath = path.join(__dirname, '..', 'uploads', path.basename(oldCertificateUrl));
+        try {
+          await fs.unlink(oldFilePath);
+        } catch (err) {
+          console.warn('Could not delete old certificate:', err.message);
+        }
+      }
+    }
+
+    // Update activity (with or without certificate)
+    let updateQuery, updateParams;
+    
+    if (certificateUrl) {
+      // Update with new certificate
+      updateQuery = `
+        UPDATE activities 
+        SET title = $1, description = $2, activity_type = $3, category = $4,
+            start_date = $5, end_date = $6, organization = $7, certificate_url = $8, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $9 AND student_id = $10
+        RETURNING *
+      `;
+      updateParams = [title, description, activityType, category, startDate, endDate, organization, certificateUrl, id, studentId];
+    } else {
+      // Update without changing certificate
+      updateQuery = `
+        UPDATE activities 
+        SET title = $1, description = $2, activity_type = $3, category = $4,
+            start_date = $5, end_date = $6, organization = $7, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $8 AND student_id = $9
+        RETURNING *
+      `;
+      updateParams = [title, description, activityType, category, startDate, endDate, organization, id, studentId];
+    }
+
+    const result = await pool.query(updateQuery, updateParams);
 
     res.json({
       message: 'Activity updated successfully',
@@ -387,6 +444,7 @@ router.delete('/:id', auth, isStudent, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.userId;
+    const pool = getPool();
 
     // Check if activity belongs to student
     const studentResult = await pool.query(

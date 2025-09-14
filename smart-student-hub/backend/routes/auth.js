@@ -96,7 +96,7 @@ router.post('/register', async (req, res) => {
 // Login user
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, userType } = req.body;
 
     // Validate required fields
     if (!email || !password) {
@@ -135,6 +135,42 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Validate user type matches role (if userType is provided)
+    if (userType && user.role !== userType) {
+      return res.status(401).json({
+        message: `This account is registered as ${user.role}, not ${userType}. Please select the correct account type.`
+      });
+    }
+
+    // Get role-specific information
+    let roleSpecificData = {};
+    if (user.role === 'student') {
+      const studentResult = await pool.query(
+        'SELECT id, student_id FROM students WHERE user_id = $1',
+        [user.id]
+      );
+      if (studentResult.rows.length > 0) {
+        roleSpecificData = {
+          studentId: studentResult.rows[0].id,
+          studentNumber: studentResult.rows[0].student_id
+        };
+      }
+    } else if (user.role === 'faculty') {
+      const facultyResult = await pool.query(
+        'SELECT id, employee_id, department, designation, specialization FROM faculty WHERE user_id = $1',
+        [user.id]
+      );
+      if (facultyResult.rows.length > 0) {
+        roleSpecificData = {
+          facultyId: facultyResult.rows[0].id,
+          employeeId: facultyResult.rows[0].employee_id,
+          department: facultyResult.rows[0].department,
+          designation: facultyResult.rows[0].designation,
+          specialization: facultyResult.rows[0].specialization
+        };
+      }
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
@@ -150,7 +186,8 @@ router.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         firstName: user.first_name,
-        lastName: user.last_name
+        lastName: user.last_name,
+        ...roleSpecificData
       }
     });
 

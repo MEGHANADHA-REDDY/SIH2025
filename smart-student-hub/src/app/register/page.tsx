@@ -89,10 +89,23 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setSuccess('Registration successful! Redirecting to login...')
-        setTimeout(() => {
-          router.push('/login')
-        }, 2000)
+        if (formData.role === 'student') {
+          setSuccess('Registration successful! Redirecting to complete your profile...')
+          setTimeout(() => {
+            // Store user data for the details page
+            localStorage.setItem('newStudentData', JSON.stringify({
+              email: formData.email,
+              firstName: formData.firstName,
+              lastName: formData.lastName
+            }))
+            router.push('/details')
+          }, 2000)
+        } else {
+          setSuccess('Registration successful! Redirecting to login...')
+          setTimeout(() => {
+            router.push('/login')
+          }, 2000)
+        }
       } else {
         setError(data.message || 'Registration failed')
       }

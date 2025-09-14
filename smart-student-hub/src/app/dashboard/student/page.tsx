@@ -161,9 +161,12 @@ export default function StudentDashboard() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <User className="h-5 w-5 text-gray-500" />
-                <span className="text-sm text-gray-700">
+                <button
+                  onClick={() => router.push(`/profile/${user.studentId || user.id}`)}
+                  className="text-sm text-gray-700 hover:text-blue-600 transition-colors cursor-pointer"
+                >
                   {user.firstName} {user.lastName}
-                </span>
+                </button>
                 <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                   Student
                 </span>
@@ -195,7 +198,10 @@ export default function StudentDashboard() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <button className="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={() => router.push('/dashboard/student/add-activity')}
+              className="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition-colors"
+            >
               <div className="flex items-center space-x-3">
                 <Plus className="h-8 w-8" />
                 <div className="text-left">
@@ -205,7 +211,10 @@ export default function StudentDashboard() {
               </div>
             </button>
 
-            <button className="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition-colors">
+            <button 
+              onClick={() => router.push(`/portfolio/${user.studentId}`)}
+              className="bg-green-600 text-white p-6 rounded-lg hover:bg-green-700 transition-colors"
+            >
               <div className="flex items-center space-x-3">
                 <Eye className="h-8 w-8" />
                 <div className="text-left">
@@ -290,7 +299,10 @@ export default function StudentDashboard() {
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Recent Activities</h2>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                <button 
+                  onClick={() => router.push('/dashboard/student/activities')}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                >
                   View All
                 </button>
               </div>
@@ -299,7 +311,11 @@ export default function StudentDashboard() {
               {dashboardData?.activities.recent.length ? (
                 <div className="space-y-4">
                   {dashboardData.activities.recent.map((activity) => (
-                    <div key={activity.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                    <div 
+                      key={activity.id} 
+                      onClick={() => router.push(`/dashboard/student/activities/${activity.id}`)}
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 mb-2">
                           <h3 className="text-sm font-medium text-gray-900">{activity.title}</h3>
@@ -326,6 +342,9 @@ export default function StudentDashboard() {
                           <p className="text-xs text-red-600 mt-1">Reason: {activity.rejection_reason}</p>
                         )}
                       </div>
+                      <div className="flex items-center text-gray-400">
+                        <Eye className="h-4 w-4" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -334,7 +353,10 @@ export default function StudentDashboard() {
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No activities yet</h3>
                   <p className="text-gray-500 mb-4">Start building your portfolio by adding your first achievement</p>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                  <button 
+                    onClick={() => router.push('/dashboard/student/add-activity')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  >
                     Add Activity
                   </button>
                 </div>

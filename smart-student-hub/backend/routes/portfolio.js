@@ -268,11 +268,12 @@ async function getPortfolioData(studentId) {
       SELECT 
         a.*,
         ac.name as category_name,
-        f.first_name as approved_by_name,
-        f.last_name as approved_by_last_name
+        fu.first_name as approved_by_name,
+        fu.last_name as approved_by_last_name
       FROM activities a
       LEFT JOIN activity_categories ac ON a.category = ac.name
       LEFT JOIN faculty f ON a.approved_by = f.id
+      LEFT JOIN users fu ON f.user_id = fu.id
       WHERE a.student_id = $1 AND a.status = 'approved'
       ORDER BY a.created_at DESC
     `, [studentId]);

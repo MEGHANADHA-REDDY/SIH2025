@@ -70,10 +70,38 @@ const initializeDatabase = async () => {
         year_of_study INTEGER,
         cgpa DECIMAL(3,2),
         attendance_percentage DECIMAL(5,2),
+        description TEXT,
+        tech_stack TEXT,
+        skills TEXT,
+        interests TEXT,
+        career_goals TEXT,
+        linkedin_url VARCHAR(500),
+        github_url VARCHAR(500),
+        portfolio_url VARCHAR(500),
+        resume_url VARCHAR(500),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Add new profile columns if they don't exist (for existing databases)
+    try {
+      await client.query(`
+        ALTER TABLE students 
+        ADD COLUMN IF NOT EXISTS description TEXT,
+        ADD COLUMN IF NOT EXISTS tech_stack TEXT,
+        ADD COLUMN IF NOT EXISTS skills TEXT,
+        ADD COLUMN IF NOT EXISTS interests TEXT,
+        ADD COLUMN IF NOT EXISTS career_goals TEXT,
+        ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(500),
+        ADD COLUMN IF NOT EXISTS github_url VARCHAR(500),
+        ADD COLUMN IF NOT EXISTS portfolio_url VARCHAR(500),
+        ADD COLUMN IF NOT EXISTS resume_url VARCHAR(500)
+      `);
+    } catch (error) {
+      // Columns might already exist, ignore error
+      console.log('Profile columns already exist or error adding them:', error.message);
+    }
 
     // Create faculty table
     await client.query(`

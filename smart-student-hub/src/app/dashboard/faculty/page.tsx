@@ -13,7 +13,13 @@ import {
   Building,
   Award,
   Eye,
-  AlertCircle
+  AlertCircle,
+  FileText,
+  Calendar,
+  Download,
+  X,
+  Check,
+  MessageSquare
 } from 'lucide-react'
 
 interface Activity {
@@ -22,11 +28,21 @@ interface Activity {
   description: string
   activity_type: string
   category: string
+  organization: string
+  start_date: string
+  end_date: string
+  certificate_url: string
   status: 'pending' | 'approved' | 'rejected'
   created_at: string
   student_id: string
   student_first_name: string
   student_last_name: string
+  student_email: string
+  student_number: string
+  student_department: string
+  student_year: string
+  category_name: string
+  points: number
 }
 
 interface DashboardData {
@@ -47,6 +63,11 @@ export default function FacultyDashboard() {
   const [user, setUser] = useState<any>(null)
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null)
+  const [showActivityModal, setShowActivityModal] = useState(false)
+  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null)
+  const [rejectionReason, setRejectionReason] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -100,27 +121,49 @@ export default function FacultyDashboard() {
     router.push('/')
   }
 
-  const handleApproveActivity = async (activityId: number, status: 'approved' | 'rejected') => {
+  const handleActivityClick = (activity: Activity) => {
+    setSelectedActivity(activity)
+    setShowActivityModal(true)
+    setApprovalAction(null)
+    setRejectionReason('')
+  }
+
+  const handleApprovalSubmit = async () => {
+    if (!selectedActivity || !approvalAction) return
+
+    setIsProcessing(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/activities/${activityId}/approve`, {
+      const response = await fetch(`http://localhost:5000/api/activities/${selectedActivity.id}/approve`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          action: approvalAction,
+          rejectionReason: approvalAction === 'reject' ? rejectionReason : undefined
+        }),
       })
 
       if (response.ok) {
         // Refresh dashboard data
-        fetchDashboardData(token!)
+        const token = localStorage.getItem('token')
+        if (token) fetchDashboardData(token)
+        setShowActivityModal(false)
+        setSelectedActivity(null)
       } else {
-        console.error('Failed to update activity status')
+        console.error('Failed to process approval')
       }
     } catch (error) {
-      console.error('Error updating activity status:', error)
+      console.error('Error processing approval:', error)
+    } finally {
+      setIsProcessing(false)
     }
+  }
+
+  const viewStudentProfile = (studentId: string) => {
+    router.push(`/profile/${studentId}`)
   }
 
   if (isLoading) {
@@ -195,22 +238,28 @@ export default function FacultyDashboard() {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <button className="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={() => router.push('/dashboard/faculty/students')}
+              className="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition-colors"
+            >
               <div className="flex items-center space-x-3">
                 <Users className="h-8 w-8" />
                 <div className="text-left">
-                  <h3 className="text-lg font-semibold">View Students</h3>
-                  <p className="text-blue-100">Browse student profiles</p>
+                  <h3 className="text-lg font-semibold">View All Students</h3>
+                  <p className="text-blue-100">Browse complete student directory</p>
                 </div>
               </div>
             </button>
 
-            <button className="bg-yellow-600 text-white p-6 rounded-lg hover:bg-yellow-700 transition-colors">
+            <button 
+              onClick={() => router.push('/dashboard/faculty/accepted-reviews')}
+              className="bg-yellow-600 text-white p-6 rounded-lg hover:bg-yellow-700 transition-colors"
+            >
               <div className="flex items-center space-x-3">
-                <Clock className="h-8 w-8" />
+                <CheckCircle className="h-8 w-8" />
                 <div className="text-left">
-                  <h3 className="text-lg font-semibold">Pending Reviews</h3>
-                  <p className="text-yellow-100">Review activities</p>
+                  <h3 className="text-lg font-semibold">Accepted Reviews</h3>
+                  <p className="text-yellow-100">View approved activities</p>
                 </div>
               </div>
             </button>
@@ -285,7 +334,7 @@ export default function FacultyDashboard() {
             </div>
           </div>
 
-          {/* Recent Activities to Review */}
+          {/* Activities Pending Review */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
@@ -299,41 +348,83 @@ export default function FacultyDashboard() {
               {dashboardData?.recentActivities.length ? (
                 <div className="space-y-4">
                   {dashboardData.recentActivities.map((activity) => (
-                    <div key={activity.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={activity.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-3 mb-2">
-                            <h3 className="text-sm font-medium text-gray-900">{activity.title}</h3>
+                            <h3 className="text-lg font-medium text-gray-900">{activity.title}</h3>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                               <Clock className="h-3 w-3 mr-1" />
-                              Pending
+                              Pending Review
                             </span>
                           </div>
-                          <p className="text-sm text-gray-500 mb-2">{activity.description}</p>
-                          <div className="flex items-center space-x-4 text-xs text-gray-400 mb-3">
-                            <span className="flex items-center">
-                              <Building className="h-3 w-3 mr-1" />
-                              {activity.category}
-                            </span>
-                            <span>Student: {activity.student_first_name} {activity.student_last_name}</span>
-                            <span>ID: {activity.student_id}</span>
+                          <p className="text-sm text-gray-600 mb-3">{activity.description}</p>
+                          
+                          {/* Student Info */}
+                          <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {activity.student_first_name} {activity.student_last_name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  ID: {activity.student_number} • {activity.student_department} • Year {activity.student_year}
+                                </p>
+                              </div>
+                              <button
+                                onClick={() => viewStudentProfile(activity.student_id)}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                              >
+                                <User className="h-4 w-4 mr-1" />
+                                View Profile
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Activity Details */}
+                          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+                            <div className="flex items-center">
+                              <Building className="h-4 w-4 mr-2 text-blue-600" />
+                              {activity.organization}
+                            </div>
+                            <div className="flex items-center">
+                              <Calendar className="h-4 w-4 mr-2 text-green-600" />
+                              {new Date(activity.start_date).toLocaleDateString()} - {new Date(activity.end_date).toLocaleDateString()}
+                            </div>
+                            <div className="flex items-center">
+                              <Award className="h-4 w-4 mr-2 text-purple-600" />
+                              {activity.category_name} ({activity.points} points)
+                            </div>
+                            <div className="flex items-center">
+                              <FileText className="h-4 w-4 mr-2 text-orange-600" />
+                              {activity.activity_type}
+                            </div>
                           </div>
                         </div>
-                        <div className="flex space-x-2 ml-4">
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        <div className="flex space-x-3">
+                          {activity.certificate_url && (
+                            <a
+                              href={`http://localhost:5000${activity.certificate_url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium"
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              View Certificate
+                            </a>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
                           <button
-                            onClick={() => handleApproveActivity(activity.id, 'approved')}
-                            className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                            onClick={() => handleActivityClick(activity)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 flex items-center"
                           >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleApproveActivity(activity.id, 'rejected')}
-                            className="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700"
-                          >
-                            Reject
-                          </button>
-                          <button className="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">
-                            <Eye className="h-3 w-3" />
+                            <Eye className="h-4 w-4 mr-1" />
+                            Review
                           </button>
                         </div>
                       </div>
@@ -342,7 +433,7 @@ export default function FacultyDashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                  <Clock className="h-12 w-12 text-yellow-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
                   <p className="text-gray-500">No activities pending review at the moment</p>
                 </div>
@@ -351,6 +442,189 @@ export default function FacultyDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Activity Review Modal */}
+      {showActivityModal && selectedActivity && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">{selectedActivity.title}</h2>
+                  <p className="text-blue-100">Activity Review & Approval</p>
+                </div>
+                <button
+                  onClick={() => setShowActivityModal(false)}
+                  className="text-white hover:text-gray-200"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {/* Student Information */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
+                  <User className="h-5 w-5 mr-2 text-blue-600" />
+                  Student Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Name</p>
+                    <p className="font-medium text-gray-900">{selectedActivity.student_first_name} {selectedActivity.student_last_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Student ID</p>
+                    <p className="font-medium text-gray-900">{selectedActivity.student_number}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Department</p>
+                    <p className="font-medium text-gray-900">{selectedActivity.student_department}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Year</p>
+                    <p className="font-medium text-gray-900">Year {selectedActivity.student_year}</p>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => viewStudentProfile(selectedActivity.student_id)}
+                    className="text-blue-600 hover:text-blue-700 font-medium flex items-center"
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    View Complete Student Profile
+                  </button>
+                </div>
+              </div>
+
+              {/* Activity Details */}
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Activity Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Description</p>
+                      <p className="text-gray-900">{selectedActivity.description}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Organization</p>
+                      <p className="text-gray-900">{selectedActivity.organization}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Activity Type</p>
+                      <p className="text-gray-900 capitalize">{selectedActivity.activity_type}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Category</p>
+                      <p className="text-gray-900">{selectedActivity.category_name} ({selectedActivity.points} points)</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Start Date</p>
+                      <p className="text-gray-900">{new Date(selectedActivity.start_date).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">End Date</p>
+                      <p className="text-gray-900">{new Date(selectedActivity.end_date).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Certificate */}
+                {selectedActivity.certificate_url && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Certificate</h3>
+                    <a
+                      href={`http://localhost:5000${selectedActivity.certificate_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Certificate
+                    </a>
+                  </div>
+                )}
+
+                {/* Approval Actions */}
+                <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Review Decision</h3>
+                  
+                  <div className="space-y-4">
+                    {/* Action Selection */}
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={() => setApprovalAction('approve')}
+                        className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                          approvalAction === 'approve'
+                            ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => setApprovalAction('reject')}
+                        className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                          approvalAction === 'reject'
+                            ? 'bg-red-100 text-red-800 border-2 border-red-300'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Reject
+                      </button>
+                    </div>
+
+                    {/* Rejection Reason */}
+                    {approvalAction === 'reject' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Reason for Rejection *
+                        </label>
+                        <textarea
+                          value={rejectionReason}
+                          onChange={(e) => setRejectionReason(e.target.value)}
+                          rows={3}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Please provide a reason for rejecting this activity..."
+                          required
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6">
+                <button
+                  onClick={() => setShowActivityModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApprovalSubmit}
+                  disabled={!approvalAction || (approvalAction === 'reject' && !rejectionReason.trim()) || isProcessing}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  {isProcessing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Processing...
+                    </>
+                  ) : (
+                    `${approvalAction === 'approve' ? 'Approve' : 'Reject'} Activity`
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -48,6 +48,8 @@ app.use('/api/faculty', require('./routes/faculty'));
 app.use('/api/activities', require('./routes/activities'));
 app.use('/api/portfolio', require('./routes/portfolio'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/admin-management', require('./routes/admin-management'));
+app.use('/api/jobs', require('./routes/jobs'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

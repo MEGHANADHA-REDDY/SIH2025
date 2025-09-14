@@ -37,6 +37,24 @@ const resumeUpload = multer({
 
 const router = express.Router();
 
+// Function to check if student profile is complete
+const checkProfileCompletion = (student) => {
+  const requiredFields = [
+    'department',
+    'year_of_study',
+    'description',
+    'tech_stack',
+    'skills',
+    'interests',
+    'career_goals'
+  ];
+
+  return requiredFields.every(field => {
+    const value = student[field];
+    return value && value.toString().trim() !== '';
+  });
+};
+
 // Get student dashboard data
 router.get('/dashboard', auth, isStudent, async (req, res) => {
   try {
@@ -58,6 +76,16 @@ router.get('/dashboard', auth, isStudent, async (req, res) => {
     }
 
     const student = studentResult.rows[0];
+
+    // Check if profile is complete
+    const isProfileComplete = checkProfileCompletion(student);
+    if (!isProfileComplete) {
+      return res.status(200).json({
+        message: 'Profile incomplete',
+        profileComplete: false,
+        student: student
+      });
+    }
 
     // Get activities count by status
     const activitiesResult = await pool.query(`
@@ -92,15 +120,32 @@ router.get('/dashboard', auth, isStudent, async (req, res) => {
       LIMIT 1
     `, [student.id]);
 
+    // Get recent job applications
+    const jobApplicationsResult = await pool.query(`
+      SELECT 
+        ja.id,
+        jp.title as job_title,
+        jp.company,
+        ja.status,
+        ja.applied_at
+      FROM job_applications ja
+      JOIN job_postings jp ON ja.job_posting_id = jp.id
+      WHERE ja.student_id = $1
+      ORDER BY ja.applied_at DESC
+      LIMIT 5
+    `, [student.id]);
+
     res.json({
       message: 'Dashboard data retrieved successfully',
+      profileComplete: true,
       data: {
         profile: student,
         activities: {
           byStatus: activitiesResult.rows,
           recent: recentActivitiesResult.rows
         },
-        portfolio: portfolioResult.rows[0] || null
+        portfolio: portfolioResult.rows[0] || null,
+        jobApplications: jobApplicationsResult.rows
       }
     });
 

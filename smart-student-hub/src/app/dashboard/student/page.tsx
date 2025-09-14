@@ -16,7 +16,8 @@ import {
   Building,
   CheckCircle,
   Clock,
-  XCircle
+  XCircle,
+  Briefcase
 } from 'lucide-react'
 
 interface Activity {
@@ -31,6 +32,14 @@ interface Activity {
   rejection_reason?: string
 }
 
+interface JobApplication {
+  id: number
+  job_title: string
+  company: string
+  status: 'applied' | 'reviewed' | 'shortlisted' | 'rejected' | 'hired'
+  applied_at: string
+}
+
 interface DashboardData {
   profile: any
   activities: {
@@ -38,6 +47,7 @@ interface DashboardData {
     recent: Activity[]
   }
   portfolio: any
+  jobApplications: JobApplication[]
 }
 
 export default function StudentDashboard() {
@@ -80,6 +90,14 @@ export default function StudentDashboard() {
 
       if (response.ok) {
         const data = await response.json()
+        
+        // Check if profile is complete
+        if (data.profileComplete === false) {
+          // Redirect to profile completion page
+          router.push('/profile/complete')
+          return
+        }
+        
         setDashboardData(data.data)
       } else {
         console.error('Failed to fetch dashboard data')
@@ -197,7 +215,7 @@ export default function StudentDashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <button 
               onClick={() => router.push('/dashboard/student/add-activity')}
               className="bg-blue-600 text-white p-6 rounded-lg hover:bg-blue-700 transition-colors"
@@ -207,6 +225,19 @@ export default function StudentDashboard() {
                 <div className="text-left">
                   <h3 className="text-lg font-semibold">Add Activity</h3>
                   <p className="text-blue-100">Upload new achievement</p>
+                </div>
+              </div>
+            </button>
+
+            <button 
+              onClick={() => router.push('/jobs')}
+              className="bg-orange-600 text-white p-6 rounded-lg hover:bg-orange-700 transition-colors"
+            >
+              <div className="flex items-center space-x-3">
+                <Briefcase className="h-8 w-8" />
+                <div className="text-left">
+                  <h3 className="text-lg font-semibold">Job Opportunities</h3>
+                  <p className="text-orange-100">Browse & apply for jobs</p>
                 </div>
               </div>
             </button>
@@ -358,6 +389,67 @@ export default function StudentDashboard() {
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
                   >
                     Add Activity
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Job Applications */}
+          <div className="bg-white rounded-lg shadow">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Briefcase className="h-5 w-5 mr-2 text-orange-600" />
+                  Recent Job Applications
+                </h2>
+                <button 
+                  onClick={() => router.push('/jobs')}
+                  className="text-orange-600 hover:text-orange-700 text-sm font-medium"
+                >
+                  View All Jobs
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              {dashboardData?.jobApplications && dashboardData.jobApplications.length > 0 ? (
+                <div className="space-y-4">
+                  {dashboardData.jobApplications.slice(0, 3).map((application) => (
+                    <div key={application.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="text-sm font-medium text-gray-900">{application.job_title}</h3>
+                        <p className="text-sm text-gray-500">{application.company}</p>
+                        <div className="flex items-center mt-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            application.status === 'applied' ? 'bg-blue-100 text-blue-800' :
+                            application.status === 'reviewed' ? 'bg-yellow-100 text-yellow-800' :
+                            application.status === 'shortlisted' ? 'bg-green-100 text-green-800' :
+                            application.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            'bg-purple-100 text-purple-800'
+                          }`}>
+                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                          </span>
+                          <span className="text-xs text-gray-400 ml-2">
+                            Applied {new Date(application.applied_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center text-gray-400">
+                        <Briefcase className="h-4 w-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No job applications yet</h3>
+                  <p className="text-gray-500 mb-4">Start exploring job opportunities and apply for positions</p>
+                  <button 
+                    onClick={() => router.push('/jobs')}
+                    className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700"
+                  >
+                    Browse Jobs
                   </button>
                 </div>
               )}

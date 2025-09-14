@@ -6,91 +6,11 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Register new user
+// Register new user - DISABLED
 router.post('/register', async (req, res) => {
-  try {
-    const { email, password, role, firstName, lastName, phone, ...additionalData } = req.body;
-
-    // Validate required fields
-    if (!email || !password || !role || !firstName || !lastName) {
-      return res.status(400).json({
-        message: 'Please provide all required fields: email, password, role, firstName, lastName'
-      });
-    }
-
-    // Validate role
-    if (!['student', 'faculty', 'admin'].includes(role)) {
-      return res.status(400).json({
-        message: 'Invalid role. Must be student, faculty, or admin'
-      });
-    }
-
-    // Check if user already exists
-    const pool = getPool();
-    const existingUser = await pool.query(
-      'SELECT id FROM users WHERE email = $1',
-      [email]
-    );
-
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({
-        message: 'User with this email already exists'
-      });
-    }
-
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Create user
-    const userResult = await pool.query(
-      'INSERT INTO users (email, password, role, first_name, last_name, phone) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role, first_name, last_name, created_at',
-      [email, hashedPassword, role, firstName, lastName, phone]
-    );
-
-    const user = userResult.rows[0];
-
-    // Create role-specific profile
-    if (role === 'student') {
-      const { studentId, department, yearOfStudy } = additionalData;
-      await pool.query(
-        'INSERT INTO students (user_id, student_id, department, year_of_study) VALUES ($1, $2, $3, $4)',
-        [user.id, studentId, department, yearOfStudy]
-      );
-    } else if (role === 'faculty') {
-      const { employeeId, department, designation, specialization } = additionalData;
-      await pool.query(
-        'INSERT INTO faculty (user_id, employee_id, department, designation, specialization) VALUES ($1, $2, $3, $4, $5)',
-        [user.id, employeeId, department, designation, specialization]
-      );
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-    );
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        createdAt: user.created_at
-      }
-    });
-
-  } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({
-      message: 'Internal server error during registration'
-    });
-  }
+  return res.status(403).json({
+    message: 'Registration is disabled. Account creation is restricted to administrators only.'
+  });
 });
 
 // Login user

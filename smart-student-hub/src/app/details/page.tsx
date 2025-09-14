@@ -226,7 +226,7 @@ export default function StudentDetailsPage() {
                   rows={4}
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Write a brief description about yourself, your background, and what makes you unique..."
                 />
               </div>
@@ -242,7 +242,7 @@ export default function StudentDetailsPage() {
                     rows={3}
                     value={formData.interests}
                     onChange={handleInputChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="What are you passionate about outside of academics?"
                   />
                 </div>
@@ -257,7 +257,7 @@ export default function StudentDetailsPage() {
                     rows={3}
                     value={formData.careerGoals}
                     onChange={handleInputChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="What are your career aspirations and goals?"
                   />
                 </div>
@@ -285,7 +285,7 @@ export default function StudentDetailsPage() {
                   rows={3}
                   value={formData.techStack}
                   onChange={handleInputChange}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="e.g., JavaScript, Python, React, Node.js, MySQL, AWS..."
                 />
               </div>
@@ -300,7 +300,7 @@ export default function StudentDetailsPage() {
                   rows={3}
                   value={formData.skills}
                   onChange={handleInputChange}
-                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="e.g., Git, Docker, Figma, Data Analysis, Project Management..."
                 />
               </div>
@@ -326,7 +326,7 @@ export default function StudentDetailsPage() {
                     name="linkedinUrl"
                     value={formData.linkedinUrl}
                     onChange={handleInputChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="https://linkedin.com/in/yourprofile"
                   />
                 </div>
@@ -341,7 +341,7 @@ export default function StudentDetailsPage() {
                     name="githubUrl"
                     value={formData.githubUrl}
                     onChange={handleInputChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="https://github.com/yourusername"
                   />
                 </div>
@@ -356,7 +356,7 @@ export default function StudentDetailsPage() {
                     name="portfolioUrl"
                     value={formData.portfolioUrl}
                     onChange={handleInputChange}
-                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="https://yourportfolio.com"
                   />
                 </div>

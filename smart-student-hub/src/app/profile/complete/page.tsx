@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
   GraduationCap, 
   User, 
-  ArrowLeft,
   Save,
   Upload,
   AlertCircle,
@@ -17,7 +16,8 @@ import {
   Linkedin,
   Github,
   Globe,
-  FileText
+  FileText,
+  ArrowRight
 } from 'lucide-react'
 
 interface StudentProfile {
@@ -27,8 +27,8 @@ interface StudentProfile {
   email: string
   phone?: string
   student_id: string
-  department: string
-  year_of_study: string
+  department?: string
+  year_of_study?: string
   description?: string
   tech_stack?: string
   skills?: string
@@ -40,8 +40,7 @@ interface StudentProfile {
   resume_url?: string
 }
 
-export default function EditProfilePage({ params }: { params: Promise<{ studentId: string }> }) {
-  const resolvedParams = use(params)
+export default function CompleteProfilePage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [formData, setFormData] = useState({
@@ -65,18 +64,12 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
   const router = useRouter()
 
   useEffect(() => {
-    // Get current user data and check permissions
+    // Get current user data
     const userData = localStorage.getItem('user')
     if (userData) {
       try {
         const user = JSON.parse(userData)
         setCurrentUser(user)
-        
-        // Check if user can edit this profile
-        if (!user.studentId || user.studentId.toString() !== resolvedParams.studentId) {
-          router.push('/dashboard')
-          return
-        }
       } catch (error) {
         console.error('Error parsing user data:', error)
         router.push('/login')
@@ -86,46 +79,48 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
       router.push('/login')
       return
     }
-    
-    fetchStudentProfile()
-  }, [resolvedParams.studentId, router])
+  }, [router])
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchStudentProfile()
+    }
+  }, [currentUser])
 
   const fetchStudentProfile = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/students/profile/${resolvedParams.studentId}`, {
+      const response = await fetch(`http://localhost:5000/api/students/profile/${currentUser?.studentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch student profile')
+      if (response.ok) {
+        const data = await response.json()
+        setProfile(data.data)
+        
+        // Pre-fill form with existing data
+        setFormData({
+          firstName: data.data.first_name || '',
+          lastName: data.data.last_name || '',
+          phone: data.data.phone || '',
+          description: data.data.description || '',
+          techStack: data.data.tech_stack || '',
+          skills: data.data.skills || '',
+          interests: data.data.interests || '',
+          careerGoals: data.data.career_goals || '',
+          linkedinUrl: data.data.linkedin_url || '',
+          githubUrl: data.data.github_url || '',
+          portfolioUrl: data.data.portfolio_url || '',
+          resume: null,
+        })
+      } else {
+        setError('Failed to fetch profile data')
       }
-
-      const data = await response.json()
-      const profileData = data.data
-      setProfile(profileData)
-      
-      // Pre-fill form with existing data
-      setFormData({
-        firstName: profileData.first_name || '',
-        lastName: profileData.last_name || '',
-        phone: profileData.phone || '',
-        description: profileData.description || '',
-        techStack: profileData.tech_stack || '',
-        skills: profileData.skills || '',
-        interests: profileData.interests || '',
-        careerGoals: profileData.career_goals || '',
-        linkedinUrl: profileData.linkedin_url || '',
-        githubUrl: profileData.github_url || '',
-        portfolioUrl: profileData.portfolio_url || '',
-        resume: null,
-      })
-      
     } catch (error) {
       console.error('Error fetching profile:', error)
-      setError('Failed to load profile data')
+      setError('Failed to fetch profile data')
     } finally {
       setIsLoading(false)
     }
@@ -140,28 +135,11 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validate file type
-      const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
-      if (!allowedTypes.includes(file.type)) {
-        setError('Please upload a PDF or Word document for your resume')
-        return
-      }
-
-      // Validate file size (5MB max)
-      const maxSize = 5 * 1024 * 1024
-      if (file.size > maxSize) {
-        setError('Resume file size must be less than 5MB')
-        return
-      }
-
-      setFormData(prev => ({
-        ...prev,
-        resume: file
-      }))
-      setError('')
-    }
+    const file = e.target.files?.[0] || null
+    setFormData(prev => ({
+      ...prev,
+      resume: file
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -172,50 +150,45 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
 
     try {
       const token = localStorage.getItem('token')
-      const submitData = new FormData()
+      const formDataToSend = new FormData()
       
-      // Append all form fields
-      submitData.append('firstName', formData.firstName)
-      submitData.append('lastName', formData.lastName)
-      submitData.append('phone', formData.phone)
-      submitData.append('description', formData.description)
-      submitData.append('techStack', formData.techStack)
-      submitData.append('skills', formData.skills)
-      submitData.append('interests', formData.interests)
-      submitData.append('careerGoals', formData.careerGoals)
-      submitData.append('linkedinUrl', formData.linkedinUrl)
-      submitData.append('githubUrl', formData.githubUrl)
-      submitData.append('portfolioUrl', formData.portfolioUrl)
+      // Add form fields
+      formDataToSend.append('firstName', formData.firstName)
+      formDataToSend.append('lastName', formData.lastName)
+      formDataToSend.append('phone', formData.phone)
+      formDataToSend.append('description', formData.description)
+      formDataToSend.append('techStack', formData.techStack)
+      formDataToSend.append('skills', formData.skills)
+      formDataToSend.append('interests', formData.interests)
+      formDataToSend.append('careerGoals', formData.careerGoals)
+      formDataToSend.append('linkedinUrl', formData.linkedinUrl)
+      formDataToSend.append('githubUrl', formData.githubUrl)
+      formDataToSend.append('portfolioUrl', formData.portfolioUrl)
       
-      // Only append resume if a new one is selected
       if (formData.resume) {
-        submitData.append('resume', formData.resume)
+        formDataToSend.append('resume', formData.resume)
       }
 
-      const response = await fetch(`http://localhost:5000/api/students/profile/${resolvedParams.studentId}`, {
+      const response = await fetch(`http://localhost:5000/api/students/profile/${currentUser?.studentId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
-        body: submitData,
+        body: formDataToSend
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update profile')
+      if (response.ok) {
+        setSuccess('Profile completed successfully! Redirecting to dashboard...')
+        setTimeout(() => {
+          router.push('/dashboard/student')
+        }, 2000)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.message || 'Failed to update profile')
       }
-
-      setSuccess('Profile updated successfully!')
-      
-      // Redirect back to profile after a short delay
-      setTimeout(() => {
-        router.push(`/profile/${resolvedParams.studentId}`)
-      }, 2000)
-
-    } catch (error: any) {
-      console.error('Update error:', error)
-      setError(error.message || 'Failed to update profile')
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      setError('Failed to update profile')
     } finally {
       setIsSubmitting(false)
     }
@@ -223,52 +196,34 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    )
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Profile Not Found</h2>
-          <button
-            onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-700 flex items-center"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
-          </button>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push(`/profile/${resolvedParams.studentId}`)}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Profile
-            </button>
-            
-            <div className="flex items-center">
-              <GraduationCap className="h-6 w-6 text-blue-600 mr-2" />
-              <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-blue-100 p-3 rounded-full">
+              <GraduationCap className="h-8 w-8 text-blue-600" />
             </div>
           </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Complete Your Profile
+          </h1>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Welcome to Smart Student Hub! Please complete your profile to access all features and start your journey.
+          </p>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Profile Completion Form */}
         <form onSubmit={handleSubmit} className="space-y-8">
           
           {/* Error/Success Messages */}
@@ -364,7 +319,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Personal Description
+                Personal Description *
               </label>
               <textarea
                 id="description"
@@ -372,8 +327,9 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                 rows={4}
                 value={formData.description}
                 onChange={handleInputChange}
-                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Write a brief description about yourself, your background, and what makes you unique..."
+                required
               />
             </div>
           </div>
@@ -390,7 +346,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
             <div className="space-y-6">
               <div>
                 <label htmlFor="techStack" className="block text-sm font-medium text-gray-700 mb-2">
-                  Tech Stack & Programming Languages
+                  Tech Stack & Programming Languages *
                 </label>
                 <textarea
                   id="techStack"
@@ -400,12 +356,13 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                   onChange={handleInputChange}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="e.g., JavaScript, Python, React, Node.js, MySQL, AWS... (comma-separated)"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="skills" className="block text-sm font-medium text-gray-700 mb-2">
-                  Additional Skills & Tools
+                  Additional Skills & Tools *
                 </label>
                 <textarea
                   id="skills"
@@ -415,6 +372,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                   onChange={handleInputChange}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="e.g., Git, Docker, Figma, Data Analysis, Project Management... (comma-separated)"
+                  required
                 />
               </div>
             </div>
@@ -432,7 +390,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
             <div className="space-y-6">
               <div>
                 <label htmlFor="interests" className="block text-sm font-medium text-gray-700 mb-2">
-                  Interests & Hobbies
+                  Interests & Hobbies *
                 </label>
                 <textarea
                   id="interests"
@@ -442,12 +400,13 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                   onChange={handleInputChange}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="What are you passionate about outside of academics? (comma-separated)"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="careerGoals" className="block text-sm font-medium text-gray-700 mb-2">
-                  Career Goals
+                  Career Goals *
                 </label>
                 <textarea
                   id="careerGoals"
@@ -457,6 +416,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                   onChange={handleInputChange}
                   className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="What are your career aspirations and goals?"
+                  required
                 />
               </div>
             </div>
@@ -539,7 +499,7 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload New Resume (Optional)
+                Upload Resume (Optional)
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
@@ -549,57 +509,42 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                       htmlFor="resume"
                       className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                     >
-                      <span>Upload a new resume</span>
+                      <span>Upload a file</span>
                       <input
                         id="resume"
                         name="resume"
                         type="file"
-                        className="sr-only"
-                        accept=".pdf,.doc,.docx"
                         onChange={handleFileChange}
+                        accept=".pdf,.doc,.docx"
+                        className="sr-only"
                       />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 5MB</p>
-                  {formData.resume && (
-                    <p className="text-sm text-green-600 font-medium">
-                      Selected: {formData.resume.name}
-                    </p>
-                  )}
-                  {!formData.resume && profile.resume_url && (
-                    <p className="text-sm text-gray-500">
-                      Current resume will be kept if no new file is uploaded
-                    </p>
-                  )}
+                  <p className="text-xs text-gray-500">
+                    PDF, DOC, DOCX up to 5MB
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => router.push(`/profile/${resolvedParams.studentId}`)}
-              className="px-6 py-3 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-end">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Updating Profile...
+                  Completing Profile...
                 </>
               ) : (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
-                  Update Profile
+                  Complete Profile
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </button>

@@ -345,7 +345,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                   required
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter activity title"
                 />
               </div>
@@ -362,7 +362,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                   rows={4}
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Describe your activity"
                 />
               </div>
@@ -379,7 +379,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                     required
                     value={formData.activityType}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select type</option>
                     <option value="internship">Internship</option>
@@ -404,7 +404,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                     required
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select category</option>
                     {activityCategories.map((category) => (
@@ -429,7 +429,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                     required
                     value={formData.startDate}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
@@ -444,7 +444,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                     required
                     value={formData.endDate}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -461,7 +461,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
                   required
                   value={formData.organization}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter organization name"
                 />
               </div>

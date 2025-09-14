@@ -45,11 +45,16 @@ export default function LoginPage() {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
         
+        // Store user role for easy access
+        localStorage.setItem('userRole', data.user.role)
+        
         // Redirect based on user role
         if (data.user.role === 'student') {
           router.push('/dashboard/student')
         } else if (data.user.role === 'faculty') {
           router.push('/dashboard/faculty')
+        } else if (data.user.role === 'super_admin') {
+          router.push('/dashboard/super-admin')
         } else if (data.user.role === 'admin') {
           router.push('/dashboard/admin')
         } else if (data.user.role === 'recruiter') {
@@ -104,10 +109,11 @@ export default function LoginPage() {
                   name="userType"
                   value={formData.userType}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="student">Student</option>
                   <option value="faculty">Faculty</option>
+                  <option value="super_admin">Super Admin</option>
                   <option value="admin">Admin</option>
                   <option value="recruiter">Recruiter</option>
                 </select>
@@ -130,7 +136,7 @@ export default function LoginPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -153,7 +159,7 @@ export default function LoginPage() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter your password"
                   />
                   <button
@@ -197,10 +203,7 @@ export default function LoginPage() {
                 </Link>
               </div>
               <div className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                  Sign up here
-                </Link>
+                Account creation is restricted. Contact your administrator for access.
               </div>
             </div>
           </div>
@@ -208,12 +211,14 @@ export default function LoginPage() {
 
         {/* Demo Accounts */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Accounts</h3>
+          <h3 className="text-sm font-medium text-blue-800 mb-2">Working Credentials</h3>
           <div className="text-xs text-blue-700 space-y-1">
-            <div><strong>Student:</strong> student@demo.com / password123</div>
-            <div><strong>Faculty:</strong> faculty@demo.com / password123</div>
-            <div><strong>Admin:</strong> admin@demo.com / password123</div>
-            <div><strong>Recruiter:</strong> recruiter@demo.com / password123</div>
+            <div><strong>Super Admin:</strong> superadmin@smarthub.edu / admin123</div>
+            <div><strong>Normal Admin:</strong> admin@smarthub.edu / admin123</div>
+            <div><strong>Student:</strong> megha@gmail.com / password123</div>
+            <div><strong>Faculty:</strong> meghaf@gmail.com / password123</div>
+            <div><strong>Faculty:</strong> monkeydluffy6823140@gmail.com / password123</div>
+            <div><strong>Admin:</strong> meghaa@gmail.com / password123</div>
           </div>
         </div>
       </div>

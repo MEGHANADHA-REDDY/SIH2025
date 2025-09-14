@@ -50,7 +50,7 @@ const initializeDatabase = async () => {
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role VARCHAR(50) NOT NULL CHECK (role IN ('student', 'faculty', 'admin', 'recruiter')),
+        role VARCHAR(50) NOT NULL CHECK (role IN ('student', 'faculty', 'super_admin', 'admin', 'recruiter')),
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
         phone VARCHAR(20),
@@ -177,6 +177,41 @@ const initializeDatabase = async () => {
         points INTEGER DEFAULT 0,
         is_active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create job_postings table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS job_postings (
+        id SERIAL PRIMARY KEY,
+        admin_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        recruiter_id INTEGER REFERENCES recruiters(id) ON DELETE CASCADE,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        company VARCHAR(255) NOT NULL,
+        location VARCHAR(255),
+        job_type VARCHAR(100),
+        salary_range VARCHAR(100),
+        requirements TEXT,
+        benefits TEXT,
+        application_deadline DATE,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create job_applications table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS job_applications (
+        id SERIAL PRIMARY KEY,
+        job_posting_id INTEGER REFERENCES job_postings(id) ON DELETE CASCADE,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        cover_letter TEXT,
+        resume_url VARCHAR(500),
+        status VARCHAR(50) DEFAULT 'applied' CHECK (status IN ('applied', 'reviewed', 'shortlisted', 'rejected', 'hired')),
+        applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
 

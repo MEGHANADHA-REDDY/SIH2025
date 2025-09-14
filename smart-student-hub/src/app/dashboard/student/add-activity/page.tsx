@@ -273,7 +273,7 @@ export default function AddActivityPage() {
                     required
                     value={formData.title}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter activity title"
                   />
                 </div>
@@ -290,7 +290,7 @@ export default function AddActivityPage() {
                   rows={3}
                   value={formData.description}
                   onChange={handleChange}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Describe your activity or achievement"
                 />
               </div>
@@ -307,7 +307,7 @@ export default function AddActivityPage() {
                     required
                     value={formData.activityType}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select activity type</option>
                     <option value="Academic Excellence">Academic Excellence</option>
@@ -333,7 +333,7 @@ export default function AddActivityPage() {
                     required
                     value={formData.category}
                     onChange={handleChange}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select category</option>
                     {categories.map((category) => (
@@ -401,7 +401,7 @@ export default function AddActivityPage() {
                     name="organization"
                     value={formData.organization}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Enter organization name"
                   />
                 </div>

@@ -7,16 +7,8 @@ const { testConnection, initializeDatabase } = require('./config/database');
 // Load environment variables
 dotenv.config();
 
-// Set default environment variables if not provided
-process.env.DB_HOST = process.env.DB_HOST || 'localhost';
-process.env.DB_PORT = process.env.DB_PORT || '5432';
-process.env.DB_NAME = process.env.DB_NAME || 'smart_student_hub';
-process.env.DB_USER = process.env.DB_USER || 'postgres';
-process.env.DB_PASSWORD = process.env.DB_PASSWORD || 'password';
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here_make_it_long_and_secure';
-process.env.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-process.env.MAX_FILE_SIZE = process.env.MAX_FILE_SIZE || '10485760';
-process.env.UPLOAD_PATH = process.env.UPLOAD_PATH || './uploads';
+// Environment variables are loaded from .env file above
+// Only set defaults for variables not in .env
 process.env.FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 const app = express();

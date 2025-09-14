@@ -1,20 +1,20 @@
 const { Pool } = require('pg');
 
-// Database configuration
-const dbConfig = {
+// Database configuration function
+const getDbConfig = () => ({
   host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 5432,
+  port: parseInt(process.env.DB_PORT) || 5432,
   database: process.env.DB_NAME || 'smart_student_hub',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // Maximum number of clients in the pool
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
-};
+  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
+});
 
 // Create connection pool
-const pool = new Pool(dbConfig);
+const pool = new Pool(getDbConfig());
 
 // Handle pool errors
 pool.on('error', (err) => {
@@ -25,9 +25,12 @@ pool.on('error', (err) => {
 // Test database connection
 const testConnection = async () => {
   try {
-    const client = await pool.connect();
+    // Create a new connection with current environment variables
+    const testPool = new Pool(getDbConfig());
+    const client = await testPool.connect();
     console.log('✅ Database connected successfully');
     client.release();
+    await testPool.end();
   } catch (err) {
     console.error('❌ Database connection failed:', err.message);
     process.exit(1);
@@ -37,7 +40,9 @@ const testConnection = async () => {
 // Initialize database tables
 const initializeDatabase = async () => {
   try {
-    const client = await pool.connect();
+    // Create a new connection with current environment variables
+    const initPool = new Pool(getDbConfig());
+    const client = await initPool.connect();
     
     // Create users table
     await client.query(`
@@ -165,6 +170,7 @@ const initializeDatabase = async () => {
 
     console.log('✅ Database tables initialized successfully');
     client.release();
+    await initPool.end();
   } catch (err) {
     console.error('❌ Database initialization failed:', err.message);
     throw err;

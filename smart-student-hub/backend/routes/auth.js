@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { pool } = require('../config/database');
+const { getPool } = require('../config/database');
 const { auth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -26,6 +26,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
+    const pool = getPool();
     const existingUser = await pool.query(
       'SELECT id FROM users WHERE email = $1',
       [email]
@@ -105,6 +106,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Find user
+    const pool = getPool();
     const userResult = await pool.query(
       'SELECT id, email, password, role, first_name, last_name, is_active FROM users WHERE email = $1',
       [email]
@@ -187,6 +189,7 @@ router.get('/profile', auth, async (req, res) => {
       profileQuery = 'SELECT * FROM users WHERE id = $1';
     }
 
+    const pool = getPool();
     const result = await pool.query(profileQuery, profileParams);
     
     if (result.rows.length === 0) {
@@ -221,6 +224,7 @@ router.put('/profile', auth, async (req, res) => {
     const { firstName, lastName, phone, ...additionalData } = req.body;
 
     // Update basic user info
+    const pool = getPool();
     await pool.query(
       'UPDATE users SET first_name = $1, last_name = $2, phone = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
       [firstName, lastName, phone, userId]
@@ -266,6 +270,7 @@ router.put('/change-password', auth, async (req, res) => {
     }
 
     // Get current password
+    const pool = getPool();
     const userResult = await pool.query(
       'SELECT password FROM users WHERE id = $1',
       [userId]

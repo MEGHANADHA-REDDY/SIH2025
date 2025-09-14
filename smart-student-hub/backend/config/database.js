@@ -177,8 +177,12 @@ const initializeDatabase = async () => {
   }
 };
 
+// Function to get a fresh pool with current environment variables
+const getPool = () => new Pool(getDbConfig());
+
 module.exports = {
   pool,
+  getPool,
   testConnection,
   initializeDatabase
 };

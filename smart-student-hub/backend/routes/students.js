@@ -1,6 +1,6 @@
 const express = require('express');
 const { auth, isStudent } = require('../middleware/auth');
-const { pool } = require('../config/database');
+const { getPool } = require('../config/database');
 
 const router = express.Router();
 
@@ -10,6 +10,7 @@ router.get('/dashboard', auth, isStudent, async (req, res) => {
     const userId = req.user.userId;
 
     // Get student profile
+    const pool = getPool();
     const studentResult = await pool.query(`
       SELECT s.*, u.first_name, u.last_name, u.email
       FROM students s
@@ -84,6 +85,7 @@ router.get('/activities', auth, isStudent, async (req, res) => {
     const { status, category, page = 1, limit = 10 } = req.query;
 
     // Get student ID
+    const pool = getPool();
     const studentResult = await pool.query(
       'SELECT id FROM students WHERE user_id = $1',
       [userId]
@@ -208,6 +210,7 @@ router.get('/statistics', auth, isStudent, async (req, res) => {
     const userId = req.user.userId;
 
     // Get student ID
+    const pool = getPool();
     const studentResult = await pool.query(
       'SELECT id FROM students WHERE user_id = $1',
       [userId]

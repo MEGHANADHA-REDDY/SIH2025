@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, GraduationCap, Mail, Lock, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, GraduationCap, Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -73,10 +73,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Back Button - Fixed at top left */}
+      <div className="absolute top-6 left-6 z-10">
+        <Link
+          href="/"
+          className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-white hover:bg-opacity-50 rounded-lg transition-colors"
+          title="Back to Home"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back to Home
+        </Link>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          {/* Header */}
+          <div className="text-center">
           <div className="flex justify-center">
             <GraduationCap className="h-12 w-12 text-blue-600" />
           </div>
@@ -219,6 +233,7 @@ export default function LoginPage() {
             <div><strong>Faculty:</strong> meghaf@gmail.com / password123</div>
             <div><strong>Faculty:</strong> monkeydluffy6823140@gmail.com / password123</div>
             <div><strong>Admin:</strong> meghaa@gmail.com / password123</div>
+          </div>
           </div>
         </div>
       </div>

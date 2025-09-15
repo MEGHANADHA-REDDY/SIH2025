@@ -330,8 +330,8 @@ router.get('/students', auth, requireSuperAdmin, async (req, res) => {
   try {
     const pool = getPool();
     const result = await pool.query(`
-      SELECT u.id, u.email, u.first_name, u.last_name, u.phone, u.is_active, u.created_at,
-             s.student_id, s.department, s.year_of_study, s.cgpa, s.attendance_percentage
+      SELECT u.id as user_id, u.email, u.first_name, u.last_name, u.phone, u.is_active, u.created_at,
+             s.id, s.student_id, s.department, s.year_of_study, s.cgpa, s.attendance_percentage
       FROM users u
       JOIN students s ON u.id = s.user_id
       ORDER BY u.created_at DESC

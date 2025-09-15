@@ -16,9 +16,11 @@ import {
   FileText,
   BarChart3
 } from 'lucide-react'
+import Link from 'next/link'
 
 interface Student {
   id: number
+  user_id: number
   email: string
   first_name: string
   last_name: string
@@ -322,9 +324,12 @@ export default function SuperAdminDashboard() {
                             </div>
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <Link 
+                              href={`/profile/${student.id}`}
+                              className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                            >
                               {student.first_name} {student.last_name}
-                            </div>
+                            </Link>
                             <div className="text-sm text-gray-500">
                               {student.student_id} • {student.department} • Year {student.year_of_study}
                             </div>
@@ -339,9 +344,13 @@ export default function SuperAdminDashboard() {
                           }`}>
                             {student.is_active ? 'Active' : 'Inactive'}
                           </span>
-                          <button className="text-gray-400 hover:text-gray-600">
+                          <Link 
+                            href={`/profile/${student.id}`}
+                            className="text-gray-400 hover:text-blue-600 transition-colors"
+                            title="View Profile"
+                          >
                             <Eye className="h-5 w-5" />
-                          </button>
+                          </Link>
                         </div>
                       </div>
                     </li>

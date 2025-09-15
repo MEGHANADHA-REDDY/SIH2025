@@ -35,6 +35,7 @@ export default function AddActivityPage() {
     organization: ''
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -97,6 +98,13 @@ export default function AddActivityPage() {
     setSuccess('')
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null
+    setSelectedImage(file)
+    setError('')
+    setSuccess('')
+  }
+
   const validateForm = () => {
     if (!formData.title || !formData.activityType || !formData.category) {
       setError('Please fill in title, activity type, and category')
@@ -112,6 +120,18 @@ export default function AddActivityPage() {
 
       if (selectedFile.size > 10 * 1024 * 1024) {
         setError('File size must be less than 10MB')
+        return false
+      }
+    }
+
+    if (selectedImage) {
+      const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      if (!allowedImageTypes.includes(selectedImage.type)) {
+        setError('Optional image must be JPEG or PNG')
+        return false
+      }
+      if (selectedImage.size > 10 * 1024 * 1024) {
+        setError('Optional image size must be less than 10MB')
         return false
       }
     }
@@ -137,9 +157,12 @@ export default function AddActivityPage() {
         formDataToSend.append(key, value)
       })
       
-      // Append file if selected
+      // Append files if selected
       if (selectedFile) {
         formDataToSend.append('certificate', selectedFile)
+      }
+      if (selectedImage) {
+        formDataToSend.append('image', selectedImage)
       }
 
       const response = await fetch('http://localhost:5000/api/activities/upload', {
@@ -349,7 +372,7 @@ export default function AddActivityPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
-                    Start Date
+                    Start Date (Optional)
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -368,7 +391,7 @@ export default function AddActivityPage() {
 
                 <div>
                   <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
-                    End Date
+                    End Date (Optional)
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -389,7 +412,7 @@ export default function AddActivityPage() {
               {/* Organization */}
               <div>
                 <label htmlFor="organization" className="block text-sm font-medium text-gray-700 mb-2">
-                  Organization/Institution
+                  Organization/Institution (Optional)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -407,7 +430,7 @@ export default function AddActivityPage() {
                 </div>
               </div>
 
-              {/* File Upload */}
+              {/* File Upload - Required supporting doc (certificate) */}
               <div>
                 <label htmlFor="certificate" className="block text-sm font-medium text-gray-700 mb-2">
                   Certificate/Supporting Document
@@ -431,6 +454,34 @@ export default function AddActivityPage() {
                 {selectedFile && (
                   <div className="mt-2 text-sm text-green-600">
                     Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  </div>
+                )}
+              </div>
+
+              {/* Optional Image Upload */}
+              <div>
+                <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-2">
+                  Optional Activity Image (JPEG/PNG)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Upload className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept=".jpg,.jpeg,.png"
+                    onChange={handleImageChange}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional. JPEG or PNG (Max: 10MB)
+                </p>
+                {selectedImage && (
+                  <div className="mt-2 text-sm text-green-600">
+                    Selected: {selectedImage.name} ({(selectedImage.size / 1024 / 1024).toFixed(2)} MB)
                   </div>
                 )}
               </div>

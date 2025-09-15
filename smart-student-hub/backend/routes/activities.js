@@ -11,7 +11,10 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '../uploads/certificates');
+    // Save certificates and images in different subfolders
+    const isImage = /image\/(jpeg|jpg|png)/.test(file.mimetype);
+    const subfolder = isImage && file.fieldname === 'image' ? 'activity-images' : 'certificates';
+    const uploadPath = path.join(__dirname, `../uploads/${subfolder}`);
     if (!fsSync.existsSync(uploadPath)) {
       fsSync.mkdirSync(uploadPath, { recursive: true });
     }
@@ -41,8 +44,11 @@ const upload = multer({
   }
 });
 
-// Upload activity with certificate
-router.post('/upload', auth, isStudent, upload.single('certificate'), async (req, res) => {
+// Upload activity with certificate and optional image
+router.post('/upload', auth, isStudent, upload.fields([
+  { name: 'certificate', maxCount: 1 },
+  { name: 'image', maxCount: 1 }
+]), async (req, res) => {
   try {
     const userId = req.user.userId;
     const {
@@ -77,22 +83,26 @@ router.post('/upload', auth, isStudent, upload.single('certificate'), async (req
 
     const studentId = studentResult.rows[0].id;
 
-    // Prepare certificate URL
+    // Prepare file URLs
     let certificateUrl = null;
-    if (req.file) {
-      certificateUrl = `/uploads/certificates/${req.file.filename}`;
+    let imageUrl = null;
+    if (req.files && req.files['certificate'] && req.files['certificate'][0]) {
+      certificateUrl = `/uploads/certificates/${req.files['certificate'][0].filename}`;
+    }
+    if (req.files && req.files['image'] && req.files['image'][0]) {
+      imageUrl = `/uploads/activity-images/${req.files['image'][0].filename}`;
     }
 
     // Insert activity
     const result = await pool.query(`
       INSERT INTO activities (
         student_id, title, description, activity_type, category,
-        start_date, end_date, organization, certificate_url, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
+        start_date, end_date, organization, certificate_url, image_url, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending')
       RETURNING *
     `, [
       studentId, title, description, activityType, category,
-      startDate, endDate, organization, certificateUrl
+      startDate, endDate, organization, certificateUrl, imageUrl
     ]);
 
     res.status(201).json({
@@ -103,11 +113,14 @@ router.post('/upload', auth, isStudent, upload.single('certificate'), async (req
   } catch (error) {
     console.error('Activity upload error:', error);
     
-    // Clean up uploaded file if database insert failed
-    if (req.file) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting uploaded file:', err);
-      });
+    // Clean up uploaded files if database insert failed
+    if (req.files) {
+      const allFiles = [...(req.files['certificate'] || []), ...(req.files['image'] || [])];
+      allFiles.forEach((f) => {
+        fs.unlink(f.path, (err) => {
+          if (err) console.error('Error deleting uploaded file:', err);
+        });
+      })
     }
 
     res.status(500).json({

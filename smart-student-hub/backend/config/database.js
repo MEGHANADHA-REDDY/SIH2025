@@ -143,6 +143,7 @@ const initializeDatabase = async () => {
         end_date DATE,
         organization VARCHAR(255),
         certificate_url VARCHAR(500),
+        image_url VARCHAR(500),
         status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
         approved_by INTEGER REFERENCES faculty(id),
         approved_at TIMESTAMP,
@@ -151,6 +152,16 @@ const initializeDatabase = async () => {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Add optional image_url column for activities if not exists
+    try {
+      await client.query(`
+        ALTER TABLE activities 
+        ADD COLUMN IF NOT EXISTS image_url VARCHAR(500)
+      `);
+    } catch (error) {
+      console.log('image_url column exists or could not be added:', error.message);
+    }
 
     // Create portfolios table
     await client.query(`

@@ -162,6 +162,53 @@ export default function FacultyDashboard() {
     }
   }
 
+  // Static leaderboard data (LeetCode score and Academic score)
+  const staticLeaderboard = [
+    { name: 'Megha S', roll: '22CS001', branch: 'CSE', leetcodeId: 'megha_s', leetcode: 1850, academic: 8.9, hrId: 'megha_s', hrScore: 1800, ccId: 'megha_s', ccRating: 1680, heId: 'megha_s', heScore: 1750 },
+    { name: 'Arjun K', roll: '22CS014', branch: 'CSE', leetcodeId: 'arjunk', leetcode: 1720, academic: 9.2, hrId: 'arjunk', hrScore: 1600, ccId: 'arjunk', ccRating: 1550, heId: 'arjunk', heScore: 1620 },
+    { name: 'Priya R', roll: '22IT009', branch: 'IT',  leetcodeId: 'priyar', leetcode: 1630, academic: 8.4, hrId: 'priyar', hrScore: 1400, ccId: 'priyar', ccRating: 1500, heId: 'priyar', heScore: 1450 },
+    { name: 'Rahul V', roll: '22EC021', branch: 'ECE', leetcodeId: 'rahul_v', leetcode: 1580, academic: 9.0, hrId: 'rahul_v', hrScore: 1700, ccId: 'rahul_v', ccRating: 1600, heId: 'rahul_v', heScore: 1690 },
+    { name: 'Sneha P', roll: '22ME017', branch: 'ME',  leetcodeId: 'snehap', leetcode: 1495, academic: 8.1, hrId: 'snehap', hrScore: 1300, ccId: 'snehap', ccRating: 1420, heId: 'snehap', heScore: 1380 },
+  ]
+  const [sortBy, setSortBy] = useState<'leetcode' | 'academic' | 'hackerrank' | 'codechef' | 'hackerearth'>('leetcode')
+
+  const scoreLabel = (mode: typeof sortBy) => {
+    switch (mode) {
+      case 'leetcode': return 'LeetCode Score'
+      case 'academic': return 'Academic Score'
+      case 'hackerrank': return 'HackerRank Score'
+      case 'codechef': return 'CodeChef Rating'
+      case 'hackerearth': return 'HackerEarth Score'
+      default: return 'Score'
+    }
+  }
+
+  const getProfileId = (row: any, mode: typeof sortBy) => {
+    if (mode === 'leetcode') return row.leetcodeId
+    if (mode === 'hackerrank') return row.hrId
+    if (mode === 'codechef') return row.ccId
+    if (mode === 'hackerearth') return row.heId
+    return undefined
+  }
+
+  const getScore = (row: any, mode: typeof sortBy) => {
+    if (mode === 'leetcode') return row.leetcode
+    if (mode === 'academic') return row.academic
+    if (mode === 'hackerrank') return row.hrScore
+    if (mode === 'codechef') return row.ccRating
+    if (mode === 'hackerearth') return row.heScore
+    return 0
+  }
+
+  const getProfileLink = (id: string | undefined, mode: typeof sortBy) => {
+    if (!id) return '#'
+    if (mode === 'leetcode') return `https://leetcode.com/${id}`
+    if (mode === 'hackerrank') return `https://www.hackerrank.com/profile/${id}`
+    if (mode === 'codechef') return `https://www.codechef.com/users/${id}`
+    if (mode === 'hackerearth') return `https://www.hackerearth.com/@${id}`
+    return '#'
+  }
+
   const viewStudentProfile = (studentId: string) => {
     router.push(`/profile/${studentId}`)
   }
@@ -417,6 +464,17 @@ export default function FacultyDashboard() {
                               View Certificate
                             </a>
                           )}
+                          {activity.image_url && (
+                            <a
+                              href={`http://localhost:5000${activity.image_url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"
+                            >
+                              <Download className="h-4 w-4 mr-1" />
+                              View Image
+                            </a>
+                          )}
                         </div>
                         <div className="flex space-x-2">
                           <button
@@ -438,6 +496,60 @@ export default function FacultyDashboard() {
                   <p className="text-gray-500">No activities pending review at the moment</p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="bg-white rounded-lg shadow mt-8">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Leaderboard</h2>
+              <div className="flex items-center space-x-2 text-sm">
+                <span className="text-gray-600">Sort by:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-gray-700"
+                >
+                  <option value="leetcode">LeetCode Score</option>
+                  <option value="academic">Academic Score</option>
+                  <option value="hackerrank">HackerRank Score</option>
+                  <option value="codechef">CodeChef Rating</option>
+                  <option value="hackerearth">HackerEarth Score</option>
+                </select>
+              </div>
+            </div>
+            <div className="p-6 overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll No</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+                    {(sortBy === 'leetcode' || sortBy === 'hackerrank' || sortBy === 'codechef' || sortBy === 'hackerearth') && (
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profile ID</th>
+                    )}
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{scoreLabel(sortBy)}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {staticLeaderboard
+                    .slice()
+                    .sort((a, b) => sortBy === 'leetcode' ? b.leetcode - a.leetcode : b.academic - a.academic)
+                    .map((row, idx) => (
+                      <tr key={row.name} className="hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm text-gray-700">{idx + 1}</td>
+                        <td className="px-4 py-2 text-sm font-medium text-gray-900">{row.name}</td>
+                        <td className="px-4 py-2 text-sm text-gray-700">{row.roll}</td>
+                        <td className="px-4 py-2 text-sm text-gray-700">{row.branch}</td>
+                        {(sortBy === 'leetcode' || sortBy === 'hackerrank' || sortBy === 'codechef' || sortBy === 'hackerearth') && (
+                          <td className="px-4 py-2 text-sm text-blue-600 underline"><a href={getProfileLink(getProfileId(row, sortBy), sortBy)} target="_blank" rel="noreferrer">{getProfileId(row, sortBy)}</a></td>
+                        )}
+                        <td className="px-4 py-2 text-sm text-gray-700">{getScore(row, sortBy)}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

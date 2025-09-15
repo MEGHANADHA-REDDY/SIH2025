@@ -30,6 +30,7 @@ interface ActivityDetails {
   organization: string
   status: 'pending' | 'approved' | 'rejected'
   certificate_url: string
+  image_url?: string
   created_at: string
   updated_at: string
   approved_by_name?: string
@@ -366,6 +367,18 @@ export default function ActivityDetailsPage({ params }: { params: Promise<{ id: 
                     >
                       <Download className="h-4 w-4" />
                       <span>View</span>
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Optional Image */}
+              {activity.image_url && (
+                <div className="border-t border-gray-200 pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Activity Image</h3>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <a href={`http://localhost:5000${activity.image_url}`} target="_blank" rel="noopener noreferrer">
+                      <img src={`http://localhost:5000${activity.image_url}`} alt="Activity Image" className="max-h-80 rounded-md object-contain mx-auto" />
                     </a>
                   </div>
                 </div>

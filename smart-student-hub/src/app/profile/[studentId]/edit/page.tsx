@@ -541,15 +541,23 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload New Resume (Optional)
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md transition-all duration-200 ${
+                formData.resume 
+                  ? 'border-green-400 bg-green-50' 
+                  : 'border-gray-300 hover:border-blue-400'
+              }`}>
                 <div className="space-y-1 text-center">
+                  {formData.resume ? (
+                    <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
+                  ) : (
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  )}
                   <div className="flex text-sm text-gray-600">
                     <label
                       htmlFor="resume"
                       className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                     >
-                      <span>Upload a new resume</span>
+                      <span>{formData.resume ? 'Change file' : 'Upload a new resume'}</span>
                       <input
                         id="resume"
                         name="resume"
@@ -563,9 +571,17 @@ export default function EditProfilePage({ params }: { params: Promise<{ studentI
                   </div>
                   <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 5MB</p>
                   {formData.resume && (
-                    <p className="text-sm text-green-600 font-medium">
+                    <div className="mt-3 p-3 bg-green-100 border border-green-200 rounded-lg">
+                      <div className="flex items-center justify-center">
+                        <FileText className="h-4 w-4 text-green-600 mr-2" />
+                        <p className="text-sm text-green-700 font-medium">
                       Selected: {formData.resume.name}
                     </p>
+                      </div>
+                      <p className="text-xs text-green-600 mt-1">
+                        Size: {(formData.resume.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
                   )}
                   {!formData.resume && profile.resume_url && (
                     <p className="text-sm text-gray-500">

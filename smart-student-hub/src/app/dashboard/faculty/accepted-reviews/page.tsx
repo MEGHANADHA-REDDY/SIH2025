@@ -265,6 +265,17 @@ export default function AcceptedReviewsPage() {
                         View Certificate
                       </a>
                     )}
+                    {(activity as any).image_url && (
+                      <a
+                        href={`http://localhost:5000${(activity as any).image_url}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"
+                      >
+                        <Download className="h-4 w-4 mr-1" />
+                        View Image
+                      </a>
+                    )}
                   </div>
                   <div className="flex space-x-2">
                     <button

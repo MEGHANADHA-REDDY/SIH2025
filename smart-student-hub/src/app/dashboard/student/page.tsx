@@ -19,6 +19,7 @@ import {
   XCircle,
   Briefcase
 } from 'lucide-react'
+import StudentSheetCard from '../../../components/StudentSheetCard'
 
 interface Activity {
   id: number
@@ -311,6 +312,11 @@ export default function StudentDashboard() {
                 </div>
               </div>
             </button>
+          </div>
+
+          {/* Student Activity Sheet */}
+          <div className="mb-8">
+            <StudentSheetCard token={localStorage.getItem('token') || undefined} />
           </div>
 
           {/* Stats Overview */}

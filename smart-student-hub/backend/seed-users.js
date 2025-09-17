@@ -37,6 +37,16 @@ async function upsertFaculty(pool, { userId, employeeId, department }) {
   return result.rows[0].id;
 }
 
+async function upsertRecruiter(pool, { userId, company, designation }) {
+  const existing = await pool.query('SELECT id FROM recruiters WHERE user_id = $1', [userId]);
+  if (existing.rows.length > 0) return existing.rows[0].id;
+  const result = await pool.query(
+    'INSERT INTO recruiters (user_id, company, designation, industry) VALUES ($1, $2, $3, $4) RETURNING id',
+    [userId, company || 'Tech Corp', designation || 'HR Manager', 'Technology']
+  );
+  return result.rows[0].id;
+}
+
 async function main() {
   console.log('🔧 Seeding initial users...');
   await testConnection();
@@ -50,6 +60,7 @@ async function main() {
     { email: 'meghaf@gmail.com', password: 'password123', role: 'faculty', firstName: 'Megha', lastName: 'Faculty' },
     { email: 'monkeydluffy6823140@gmail.com', password: 'password123', role: 'faculty', firstName: 'Monkey', lastName: 'DLuffy' },
     { email: 'meghaa@gmail.com', password: 'password123', role: 'admin', firstName: 'Megha', lastName: 'Admin' },
+    { email: 'recruiter@techcorp.com', password: 'recruiter123', role: 'recruiter', firstName: 'Sarah', lastName: 'Johnson', phone: '+1-555-0123' },
   ];
 
   const created = [];
@@ -63,6 +74,13 @@ async function main() {
       // Generate distinct employee IDs
       const suffix = Math.floor(1000 + Math.random() * 9000);
       await upsertFaculty(pool, { userId, employeeId: `FAC${suffix}`, department: 'CSE' });
+    }
+    if (u.role === 'recruiter') {
+      await upsertRecruiter(pool, { 
+        userId, 
+        company: 'TechCorp Solutions', 
+        designation: 'Senior Talent Acquisition Manager' 
+      });
     }
     created.push({ email: u.email, role: u.role });
   }

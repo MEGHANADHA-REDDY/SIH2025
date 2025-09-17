@@ -228,6 +228,55 @@ const initializeDatabase = async () => {
       )
     `);
 
+    // Create student_sheets table for built-in sheets
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS student_sheets (
+        id SERIAL PRIMARY KEY,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        share_token VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(student_id)
+      )
+    `);
+
+    // Create student_sheet_entries table for activity data
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS student_sheet_entries (
+        id SERIAL PRIMARY KEY,
+        sheet_id INTEGER REFERENCES student_sheets(id) ON DELETE CASCADE,
+        activity_id INTEGER,
+        student_name VARCHAR(255) NOT NULL,
+        project_url TEXT,
+        course_name VARCHAR(255),
+        status VARCHAR(50) NOT NULL,
+        faculty_name VARCHAR(255),
+        certificate_id VARCHAR(100),
+        validation_score VARCHAR(50),
+        entry_date VARCHAR(50),
+        activity_type VARCHAR(100),
+        category VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Add indexes for better performance
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_student_sheets_student_id ON student_sheets(student_id)
+    `);
+    
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_student_sheets_share_token ON student_sheets(share_token)
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_student_sheet_entries_sheet_id ON student_sheet_entries(sheet_id)
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_student_sheet_entries_activity_id ON student_sheet_entries(activity_id)
+    `);
+
     // Insert default activity categories
     await client.query(`
       INSERT INTO activity_categories (name, description, points) VALUES

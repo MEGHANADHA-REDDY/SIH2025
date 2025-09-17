@@ -5,6 +5,8 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const { auth, isStudent, isFaculty } = require('../middleware/auth');
 const { getPool } = require('../config/database');
+const { getActivityDataForWebhook } = require('./webhook');
+const builtinSheetsService = require('../services/builtinSheets');
 
 const router = express.Router();
 
@@ -289,6 +291,23 @@ router.put('/:id/approve', auth, isFaculty, async (req, res) => {
       return res.status(404).json({
         message: 'Activity not found'
       });
+    }
+
+    // Trigger webhook for Google Sheets integration
+    try {
+      console.log(`🔄 Triggering webhook for activity ${id} with status ${normalizedStatus}`);
+      
+      // Get activity data for webhook
+      const webhookData = await getActivityDataForWebhook(id);
+      
+      // Send data to built-in sheets
+      await builtinSheetsService.addActivityToSheet(webhookData);
+      
+      console.log(`✅ Successfully updated built-in sheet for activity ${id}`);
+    } catch (webhookError) {
+      console.error('❌ Webhook trigger failed:', webhookError.message);
+      // Don't fail the main request if webhook fails
+      // Log the error but continue with the response
     }
 
     res.json({

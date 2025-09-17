@@ -50,6 +50,8 @@ app.use('/api/portfolio', require('./routes/portfolio'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/admin-management', require('./routes/admin-management'));
 app.use('/api/jobs', require('./routes/jobs'));
+app.use('/api/webhook', require('./routes/webhook').router);
+app.use('/api/sheets', require('./routes/sheets'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

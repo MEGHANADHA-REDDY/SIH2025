@@ -25,6 +25,7 @@ import {
   Edit
 } from 'lucide-react'
 import Link from 'next/link'
+import StudentSheetViewer from '../../../components/StudentSheetViewer'
 
 interface StudentProfile {
   id: number
@@ -397,6 +398,17 @@ export default function StudentProfilePage({ params }: { params: Promise<{ stude
                 </p>
               </div>
             </div>
+
+            {/* Student Activity Sheet - For Recruiters and Faculty */}
+            {currentUser && ['recruiter', 'faculty', 'admin', 'super_admin'].includes(currentUser.role) && (
+              <div className="mb-6">
+                <StudentSheetViewer 
+                  studentId={profile.id.toString()} 
+                  token={localStorage.getItem('token') || undefined}
+                  userRole={currentUser.role}
+                />
+              </div>
+            )}
 
             {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow">

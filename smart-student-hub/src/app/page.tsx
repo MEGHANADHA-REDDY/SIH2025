@@ -1,3 +1,4 @@
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
@@ -23,6 +24,7 @@ import {
   ChevronDown
 } from 'lucide-react'
 import heroImage from '../images/WhatsApp Image 2025-09-15 at 23.14.22_0ed1ac71.jpg'
+import { FeaturesSectionWithHoverEffects } from '@/components/ui/feature-section-with-hover-effects'
 
 export default function HomePage() {
   return (
@@ -75,7 +77,7 @@ export default function HomePage() {
 
       
 
-      {/* Key Features - Simple */}
+      {/* Key Features - With Hover Effects */}
       <section id="features" className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10">
@@ -83,76 +85,7 @@ export default function HomePage() {
             <p className="text-sm md:text-base text-gray-600 mt-2">Clean tools to manage, track, and showcase achievements</p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="group relative">
-              <div className="relative bg-white p-6 rounded-2xl border shadow-sm hover:shadow transition">
-                <div className="relative w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mb-4 text-white">
-                  <BarChart3 className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Dynamic Dashboard</h3>
-                <p className="text-gray-600 text-sm">Track performance, attendance, and credits at a glance.</p>
-              </div>
-            </div>
-            
-            <div className="group relative">
-              <div className="relative bg-white p-6 rounded-2xl border shadow-sm hover:shadow transition">
-                <div className="relative w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-4 text-white">
-                  <Upload className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Activity Tracker</h3>
-                <p className="text-gray-600 text-sm">Upload and validate seminars, MOOCs, internships, and more.</p>
-              </div>
-            </div>
-            
-            <div className="group relative">
-              <div className="relative bg-white p-6 rounded-2xl border shadow-sm hover:shadow transition">
-                <div className="relative w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center mb-4 text-white">
-                  <Shield className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Faculty Approval</h3>
-                <p className="text-gray-600 text-sm">Keep records verified and credible with faculty reviews.</p>
-              </div>
-            </div>
-            
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-600/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className="relative bg-white/90 backdrop-blur-xl p-10 rounded-3xl border border-purple-200/50 shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 group-hover:transform group-hover:scale-105 group-hover:border-purple-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-pink-600/10 rounded-full blur-2xl"></div>
-                <div className="relative w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-700 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-lg">
-                  <Download className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Digital Portfolio</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">Auto-generated, downloadable, and shareable verified student portfolio in PDF or web link format</p>
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full opacity-0 group-hover:opacity-100 animate-ping transition-opacity"></div>
-              </div>
-            </div>
-            
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-600/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className="relative bg-white/90 backdrop-blur-xl p-10 rounded-3xl border border-green-200/50 shadow-2xl hover:shadow-green-500/20 transition-all duration-500 group-hover:transform group-hover:scale-105 group-hover:border-green-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-emerald-600/10 rounded-full blur-2xl"></div>
-                <div className="relative w-16 h-16 bg-gradient-to-r from-green-600 to-emerald-700 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-lg">
-                  <TrendingUp className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Analytics & Reporting</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">Generate reports for NAAC, AICTE, NIRF, or internal evaluations with comprehensive data insights</p>
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full opacity-0 group-hover:opacity-100 animate-ping transition-opacity"></div>
-              </div>
-            </div>
-            
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-blue-600/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className="relative bg-white/90 backdrop-blur-xl p-10 rounded-3xl border border-indigo-200/50 shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 group-hover:transform group-hover:scale-105 group-hover:border-blue-300 overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-blue-600/10 rounded-full blur-2xl"></div>
-                <div className="relative w-16 h-16 bg-gradient-to-r from-indigo-600 to-blue-700 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-lg">
-                  <Users className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">Integration Support</h3>
-                <p className="text-gray-600 leading-relaxed text-lg">Seamlessly link with existing Learning Management Systems (LMS), ERP, or digital university platforms</p>
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full opacity-0 group-hover:opacity-100 animate-ping transition-opacity"></div>
-              </div>
-            </div>
-          </div>
+          <FeaturesSectionWithHoverEffects />
         </div>
       </section>
 

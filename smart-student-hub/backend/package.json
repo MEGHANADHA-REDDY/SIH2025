@@ -6,6 +6,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed:users": "node seed-users.js",
+    "test:webhook": "node test-webhook.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,7 +20,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

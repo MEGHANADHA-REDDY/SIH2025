@@ -25,6 +25,8 @@ interface ApprovedActivity {
   start_date: string
   end_date: string
   certificate_url: string
+  image_url?: string
+  github_url?: string
   status: string
   approved_at: string
   student_id: string
@@ -274,6 +276,17 @@ export default function AcceptedReviewsPage() {
                       >
                         <Download className="h-4 w-4 mr-1" />
                         View Image
+                      </a>
+                    )}
+                    {activity.github_url && (
+                      <a
+                        href={activity.github_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center text-gray-700 hover:text-gray-900 text-sm font-medium"
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        GitHub Repo
                       </a>
                     )}
                   </div>

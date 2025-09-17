@@ -32,7 +32,8 @@ export default function AddActivityPage() {
     category: '',
     startDate: '',
     endDate: '',
-    organization: ''
+    organization: '',
+    githubUrl: ''
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
@@ -132,6 +133,15 @@ export default function AddActivityPage() {
       }
       if (selectedImage.size > 10 * 1024 * 1024) {
         setError('Optional image size must be less than 10MB')
+        return false
+      }
+    }
+
+    // Optional: validate GitHub URL only if provided
+    if (formData.githubUrl) {
+      const pattern = /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9_.-]+(\/[A-Za-z0-9_.-]+)?(\/.+)?$/
+      if (!pattern.test(formData.githubUrl)) {
+        setError('Please enter a valid GitHub URL (e.g., https://github.com/user/repo)')
         return false
       }
     }
@@ -259,7 +269,7 @@ export default function AddActivityPage() {
           </div>
 
           {/* Upload Form */}
-          <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg">
+          <form onSubmit={handleSubmit} noValidate className="bg-white shadow rounded-lg">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Activity Information</h2>
             </div>
@@ -428,6 +438,28 @@ export default function AddActivityPage() {
                     placeholder="Enter organization name"
                   />
                 </div>
+              </div>
+
+              {/* GitHub URL (Optional) */}
+              <div>
+                <label htmlFor="githubUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                  GitHub Repository URL (Optional)
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FileText className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    id="githubUrl"
+                    name="githubUrl"
+                    value={formData.githubUrl}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 text-gray-900 bg-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="https://github.com/username/repository"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Optional. Paste the repo link if applicable.</p>
               </div>
 
               {/* File Upload - Required supporting doc (certificate) */}

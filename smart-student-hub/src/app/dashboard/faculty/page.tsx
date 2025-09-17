@@ -32,6 +32,8 @@ interface Activity {
   start_date: string
   end_date: string
   certificate_url: string
+  image_url?: string
+  github_url?: string
   status: 'pending' | 'approved' | 'rejected'
   created_at: string
   student_id: string
@@ -475,6 +477,17 @@ export default function FacultyDashboard() {
                               View Image
                             </a>
                           )}
+                          {activity.github_url && (
+                            <a
+                              href={activity.github_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center text-gray-700 hover:text-gray-900 text-sm font-medium underline"
+                            >
+                              <FileText className="h-4 w-4 mr-1" />
+                              GitHub Repo
+                            </a>
+                          )}
                         </div>
                         <div className="flex space-x-2">
                           <button
@@ -655,6 +668,22 @@ export default function FacultyDashboard() {
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download Certificate
+                    </a>
+                  </div>
+                )}
+
+                {/* GitHub Repository */}
+                {selectedActivity.github_url && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">GitHub Repository</h3>
+                    <a
+                      href={selectedActivity.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center bg-gray-50 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors underline"
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Open Repository
                     </a>
                   </div>
                 )}

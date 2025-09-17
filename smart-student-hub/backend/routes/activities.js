@@ -58,7 +58,8 @@ router.post('/upload', auth, isStudent, upload.fields([
       category,
       startDate,
       endDate,
-      organization
+      organization,
+      githubUrl
     } = req.body;
 
     // Validate required fields
@@ -97,12 +98,12 @@ router.post('/upload', auth, isStudent, upload.fields([
     const result = await pool.query(`
       INSERT INTO activities (
         student_id, title, description, activity_type, category,
-        start_date, end_date, organization, certificate_url, image_url, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending')
+        start_date, end_date, organization, certificate_url, image_url, github_url, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending')
       RETURNING *
     `, [
       studentId, title, description, activityType, category,
-      startDate, endDate, organization, certificateUrl, imageUrl
+      startDate, endDate, organization, certificateUrl, imageUrl, githubUrl || null
     ]);
 
     res.status(201).json({
@@ -351,7 +352,7 @@ router.put('/:id', auth, isStudent, upload.single('certificate'), async (req, re
   try {
     const { id } = req.params;
     const userId = req.user.userId;
-    const { title, description, activityType, category, startDate, endDate, organization } = req.body;
+    const { title, description, activityType, category, startDate, endDate, organization, githubUrl } = req.body;
     const pool = getPool();
 
     // Check if activity belongs to student
@@ -420,21 +421,21 @@ router.put('/:id', auth, isStudent, upload.single('certificate'), async (req, re
       updateQuery = `
         UPDATE activities 
         SET title = $1, description = $2, activity_type = $3, category = $4,
-            start_date = $5, end_date = $6, organization = $7, certificate_url = $8, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $9 AND student_id = $10
+            start_date = $5, end_date = $6, organization = $7, github_url = $8, certificate_url = $9, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $10 AND student_id = $11
         RETURNING *
       `;
-      updateParams = [title, description, activityType, category, startDate, endDate, organization, certificateUrl, id, studentId];
+      updateParams = [title, description, activityType, category, startDate, endDate, organization, githubUrl || null, certificateUrl, id, studentId];
     } else {
       // Update without changing certificate
       updateQuery = `
         UPDATE activities 
         SET title = $1, description = $2, activity_type = $3, category = $4,
-            start_date = $5, end_date = $6, organization = $7, updated_at = CURRENT_TIMESTAMP
-        WHERE id = $8 AND student_id = $9
+            start_date = $5, end_date = $6, organization = $7, github_url = $8, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $9 AND student_id = $10
         RETURNING *
       `;
-      updateParams = [title, description, activityType, category, startDate, endDate, organization, id, studentId];
+      updateParams = [title, description, activityType, category, startDate, endDate, organization, githubUrl || null, id, studentId];
     }
 
     const result = await pool.query(updateQuery, updateParams);

@@ -1,6 +1,9 @@
 const express = require('express');
 const { auth, isAdmin } = require('../middleware/auth');
 const { getPool } = require('../config/database');
+const { Parser } = require('json2csv');
+const cron = require('node-cron');
+const nodemailer = require('nodemailer');
 
 const router = express.Router();
 
@@ -388,6 +391,7 @@ router.get('/reports', auth, isAdmin, async (req, res) => {
 
 // Helper functions for report generation
 async function generateOverviewReport(department, startDate, endDate) {
+  const pool = getPool();
   const query = `
     SELECT 
       COUNT(DISTINCT s.id) as total_students,
@@ -415,6 +419,7 @@ async function generateOverviewReport(department, startDate, endDate) {
 }
 
 async function generateDepartmentReport(department, startDate, endDate) {
+  const pool = getPool();
   const query = `
     SELECT 
       s.department,
@@ -443,6 +448,7 @@ async function generateDepartmentReport(department, startDate, endDate) {
 }
 
 async function generateActivitiesReport(department, startDate, endDate) {
+  const pool = getPool();
   const query = `
     SELECT 
       a.category,
@@ -468,5 +474,95 @@ async function generateActivitiesReport(department, startDate, endDate) {
   const result = await pool.query(query, params);
   return result.rows;
 }
+
+// Export reports as CSV (NAAC-friendly)
+router.get('/reports/export', auth, isAdmin, async (req, res) => {
+  try {
+    const { type, department, startDate, endDate } = req.query;
+
+    let reportData;
+    switch (type) {
+      case 'overview':
+        reportData = await generateOverviewReport(department, startDate, endDate);
+        break;
+      case 'department':
+        reportData = await generateDepartmentReport(department, startDate, endDate);
+        break;
+      case 'activities':
+        reportData = await generateActivitiesReport(department, startDate, endDate);
+        break;
+      default:
+        return res.status(400).json({ message: 'Invalid report type' });
+    }
+
+    // Normalize to array of rows
+    const rows = Array.isArray(reportData) ? reportData : [reportData];
+    const parser = new Parser();
+    const csv = parser.parse(rows);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${type || 'report'}_${Date.now()}.csv"`);
+    res.status(200).send(csv);
+  } catch (error) {
+    console.error('Report export error:', error);
+    res.status(500).json({ message: 'Internal server error while exporting report' });
+  }
+});
+
+// Schedule report exports (simple in-memory cron registry)
+const scheduledJobs = new Map();
+
+router.post('/reports/schedule', auth, isAdmin, async (req, res) => {
+  try {
+    const { cronExpr, type, department, startDate, endDate, email } = req.body;
+    if (!cronExpr || !type || !email) {
+      return res.status(400).json({ message: 'cronExpr, type, and email are required' });
+    }
+
+    // Cancel existing job for this email+type pair
+    const key = `${email}-${type}`;
+    if (scheduledJobs.has(key)) {
+      scheduledJobs.get(key).stop();
+      scheduledJobs.delete(key);
+    }
+
+    const job = cron.schedule(cronExpr, async () => {
+      try {
+        const reportData = type === 'overview'
+          ? await generateOverviewReport(department, startDate, endDate)
+          : type === 'department'
+          ? await generateDepartmentReport(department, startDate, endDate)
+          : await generateActivitiesReport(department, startDate, endDate);
+
+        const rows = Array.isArray(reportData) ? reportData : [reportData];
+        const parser = new Parser();
+        const csv = parser.parse(rows);
+
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: false,
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+        });
+
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || process.env.SMTP_USER,
+          to: email,
+          subject: `Scheduled ${type} report`,
+          text: 'Attached is your scheduled report.',
+          attachments: [{ filename: `${type}_report.csv`, content: csv }]
+        });
+      } catch (e) {
+        console.error('Scheduled report failed:', e.message);
+      }
+    });
+
+    scheduledJobs.set(key, job);
+    res.json({ message: 'Report scheduled successfully' });
+  } catch (error) {
+    console.error('Schedule report error:', error);
+    res.status(500).json({ message: 'Internal server error while scheduling report' });
+  }
+});
 
 module.exports = router;

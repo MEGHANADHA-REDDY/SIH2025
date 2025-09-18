@@ -4,6 +4,7 @@ const path = require('path');
 const fsSync = require('fs');
 const { auth, isStudent } = require('../middleware/auth');
 const { getPool } = require('../config/database');
+const jwt = require('jsonwebtoken');
 
 // Configure multer for resume uploads
 const resumeStorage = multer.diskStorage({
@@ -353,6 +354,69 @@ router.get('/statistics', auth, isStudent, async (req, res) => {
   }
 });
 
+// Public analytics for a student (no auth)
+router.get('/analytics/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const pool = getPool();
+
+    // Ensure student exists
+    const studentExists = await pool.query('SELECT id FROM students WHERE id = $1', [studentId]);
+    if (studentExists.rows.length === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Status counts
+    const statusCountsResult = await pool.query(`
+      SELECT status, COUNT(*)::int AS count
+      FROM activities
+      WHERE student_id = $1
+      GROUP BY status
+    `, [studentId]);
+
+    // Category counts
+    const categoryCountsResult = await pool.query(`
+      SELECT COALESCE(category, 'Uncategorized') AS category, COUNT(*)::int AS count
+      FROM activities
+      WHERE student_id = $1
+      GROUP BY category
+      ORDER BY count DESC
+    `, [studentId]);
+
+    // Uploads over time (by month)
+    const uploadsByMonthResult = await pool.query(`
+      SELECT to_char(date_trunc('month', created_at), 'YYYY-MM') AS month,
+             COUNT(*)::int AS count
+      FROM activities
+      WHERE student_id = $1
+      GROUP BY 1
+      ORDER BY 1
+    `, [studentId]);
+
+    // Recent activities (minimal fields)
+    const recentActivitiesResult = await pool.query(`
+      SELECT id, title, category, status, created_at
+      FROM activities
+      WHERE student_id = $1
+      ORDER BY created_at DESC
+      LIMIT 20
+    `, [studentId]);
+
+    res.json({
+      message: 'Public analytics retrieved successfully',
+      data: {
+        statusCounts: statusCountsResult.rows,
+        categoryCounts: categoryCountsResult.rows,
+        uploadsByMonth: uploadsByMonthResult.rows,
+        recentActivities: recentActivitiesResult.rows
+      }
+    });
+  } catch (error) {
+    console.error('Public analytics error:', error);
+    res.status(500).json({ message: 'Internal server error while retrieving analytics' });
+  }
+});
+
 // Get student profile by ID (public endpoint for viewing profiles)
 router.get('/profile/:studentId', auth, async (req, res) => {
   try {
@@ -500,6 +564,99 @@ router.get('/portfolio/:studentId', auth, async (req, res) => {
     res.status(500).json({
       message: 'Internal server error while retrieving portfolio'
     });
+  }
+});
+
+// Create a signed share token for portfolio (student only)
+router.post('/portfolio/share', auth, isStudent, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const pool = getPool();
+    const studentResult = await pool.query('SELECT id FROM students WHERE user_id = $1', [userId]);
+    if (studentResult.rows.length === 0) return res.status(404).json({ message: 'Student profile not found' });
+    const studentId = studentResult.rows[0].id;
+
+    const token = jwt.sign({ studentId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    res.json({ message: 'Share token created', data: { token, url: `${req.protocol}://${req.get('host').replace(':5000', ':3000')}/portfolio/shared/${token}` } });
+  } catch (error) {
+    console.error('Share token error:', error);
+    res.status(500).json({ message: 'Internal server error while creating share token' });
+  }
+});
+
+// Public portfolio via signed token (no auth)
+router.get('/portfolio/shared/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const studentId = decoded.studentId;
+    const pool = getPool();
+
+    // Reuse portfolio query
+    const studentResult = await pool.query(`
+      SELECT 
+        s.id,
+        u.first_name,
+        u.last_name,
+        u.email,
+        u.phone,
+        s.student_id,
+        s.department,
+        s.year_of_study,
+        s.description,
+        s.tech_stack,
+        s.skills,
+        s.interests,
+        s.career_goals,
+        s.linkedin_url,
+        s.github_url,
+        s.portfolio_url,
+        s.resume_url,
+        u.created_at
+      FROM students s
+      JOIN users u ON s.user_id = u.id
+      WHERE s.id = $1
+    `, [studentId]);
+
+    if (studentResult.rows.length === 0) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const student = studentResult.rows[0];
+
+    const activitiesResult = await pool.query(`
+      SELECT 
+        a.id,
+        a.title,
+        a.description,
+        a.activity_type,
+        a.category,
+        a.start_date,
+        a.end_date,
+        a.organization,
+        a.certificate_url,
+        a.status,
+        a.created_at,
+        a.approved_at,
+        fu.first_name as approved_by_name,
+        fu.last_name as approved_by_last_name,
+        ac.name as category_name,
+        ac.points
+      FROM activities a
+      LEFT JOIN faculty f ON a.approved_by = f.id
+      LEFT JOIN users fu ON f.user_id = fu.id
+      LEFT JOIN activity_categories ac ON a.category = ac.name
+      WHERE a.student_id = $1 AND a.status = 'approved'
+      ORDER BY a.approved_at DESC
+    `, [studentId]);
+
+    const totalPoints = activitiesResult.rows.reduce((sum, activity) => sum + (activity.points || 0), 0);
+    const portfolioData = { ...student, activities: activitiesResult.rows, total_points: totalPoints, total_activities: activitiesResult.rows.length };
+
+    res.json({ message: 'Shared portfolio retrieved', data: portfolioData });
+  } catch (error) {
+    console.error('Shared portfolio error:', error);
+    return res.status(400).json({ message: 'Invalid or expired token' });
   }
 });
 

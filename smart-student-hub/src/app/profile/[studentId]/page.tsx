@@ -22,7 +22,8 @@ import {
   BookOpen,
   Briefcase,
   FileText,
-  Edit
+  Edit,
+  Share2
 } from 'lucide-react'
 import Link from 'next/link'
 import StudentSheetViewer from '../../../components/StudentSheetViewer'
@@ -145,13 +146,36 @@ export default function StudentProfilePage({ params }: { params: Promise<{ stude
             </button>
             
             {canEdit && (
-              <button
-                onClick={() => router.push(`/profile/${resolvedParams.studentId}/edit`)}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => router.push(`/profile/${resolvedParams.studentId}/edit`)}
+                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token')
+                      const res = await fetch('http://localhost:5000/api/students/portfolio/share', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                      })
+                      const json = await res.json()
+                      const url = json?.data?.url
+                      if (url) await navigator.clipboard.writeText(url)
+                      alert(url ? 'Share link copied to clipboard' : 'Failed to generate link')
+                    } catch (e) {
+                      alert('Failed to generate link')
+                    }
+                  }}
+                  className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share Portfolio
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -246,13 +246,21 @@ export default function AllActivitiesPage() {
                 Manage and track all your submitted activities
               </p>
             </div>
-            <button
-              onClick={() => router.push('/dashboard/student/add-activity')}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add Activity</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push('/dashboard/student/analytics')}
+                className="flex items-center space-x-2 border border-purple-600 text-purple-700 px-4 py-2 rounded-md hover:bg-purple-50"
+              >
+                <span>View Analytics</span>
+              </button>
+              <button
+                onClick={() => router.push('/dashboard/student/add-activity')}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Activity</span>
+              </button>
+            </div>
           </div>
 
           {/* Filters */}

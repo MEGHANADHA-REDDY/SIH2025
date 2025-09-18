@@ -19,7 +19,7 @@ import {
   XCircle,
   Briefcase
 } from 'lucide-react'
-import StudentSheetCard from '../../../components/StudentSheetCard'
+// import StudentSheetCard from '../../../components/StudentSheetCard'
 
 interface Activity {
   id: number
@@ -303,7 +303,10 @@ export default function StudentDashboard() {
               </div>
             </button>
 
-            <button className="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition-colors">
+            <button 
+              onClick={() => router.push('/dashboard/student/analytics')}
+              className="bg-purple-600 text-white p-6 rounded-lg hover:bg-purple-700 transition-colors"
+            >
               <div className="flex items-center space-x-3">
                 <TrendingUp className="h-8 w-8" />
                 <div className="text-left">
@@ -314,10 +317,7 @@ export default function StudentDashboard() {
             </button>
           </div>
 
-          {/* Student Activity Sheet */}
-          <div className="mb-8">
-            <StudentSheetCard token={localStorage.getItem('token') || undefined} />
-          </div>
+          {/* Student Activity Sheet removed */}
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

@@ -1,227 +1,135 @@
-Smart Student Hub
-A centralized student achievement management platform that transforms scattered student records into comprehensive digital portfolios.
+# Smart Student Hub
 
-🎯 Problem Statement
-Despite increasing digitization in education, student achievements ranging from academic excellence to participation in curricular and extracurricular activities remain scattered across various departments or lost in paper-based records. This gap hampers institutional efficiency and limits students' ability to build verified portfolios for job applications, higher education admissions, and skill recognition.
+Unified platform for managing student activities, approvals, analytics, and shareable portfolios. This repository contains a Next.js frontend and a Node.js/Express backend powered by PostgreSQL, plus a built-in, read-only Sheets system that replaces external spreadsheets.
 
-🚀 Solution
-Smart Student Hub is a mobile + web application that acts as a centralized student record and achievement management platform, offering:
+## ✨ Highlights
 
-Dynamic Student Dashboard: Real-time updates on academic performance, attendance, and credit-based activities
+- Centralized activity tracking with faculty approval workflow
+- Role-based dashboards: student, faculty, admin, recruiter
+- Auto-generated, shareable student activity sheets (no Google Sheets required)
+- Portfolio and analytics views
+- Production-ready Express API with JWT auth and file uploads
 
-Activity Tracker: Upload and validate participation in seminars, conferences, MOOCs, internships, and extracurriculars
+## 🧰 Tech Stack
 
-Faculty Approval Panel: Faculty/admin can approve uploaded records to maintain credibility
+- Frontend: Next.js 15 (App Router), React 19, Tailwind CSS 4
+- Backend: Node.js, Express 5, PostgreSQL, JWT, Multer
+- Charts/Animations: Chart.js, react-chartjs-2, Framer Motion, GSAP
 
-Auto-Generated Digital Portfolio: Downloadable and shareable verified student portfolio in PDF or web link format
+## 📂 Monorepo Structure
 
-Analytics & Reporting: Generate reports for NAAC, AICTE, NIRF, or internal evaluations
-
-Integration Support: Link with existing LMS, ERP, or digital university platforms
-
-🛠️ Technology Stack
-
-Frontend
-
-Framework: Next.js 15 with App Router
-
-Styling: Tailwind CSS
-
-Icons: Lucide React
-
-UI Components: Headless UI
-
-Backend (Planned)
-
-Runtime: Node.js
-
-Framework: Express.js
-
-File Upload: Multer
-
-Database: PostgreSQL
-
-Authentication: JWT (JSON Web Tokens)
-
-📁 Project Structure
-
+```
 smart-student-hub/
-├── src/
-│   ├── app/
-│   │   ├── page.tsx          # Homepage
-│   │   ├── layout.tsx        # Root layout
-│   │   └── globals.css       # Global styles
-│   └── components/           # Reusable components (to be created)
-├── public/                   # Static assets
-├── package.json
-├── tailwind.config.ts
-├── tsconfig.json
-└── README.md
+├─ src/                        # Next.js app
+│  └─ app/                     # Routes and pages
+├─ backend/                    # Express API
+│  ├─ routes/                  # API route handlers
+│  ├─ services/                # Business/services layer
+│  ├─ config/                  # DB and env config
+│  └─ uploads/                 # Uploaded certificates
+├─ public/                     # Static assets
+├─ SETUP_GUIDE.md              # End-to-end setup
+├─ DATABASE_SETUP.md           # DB specifics
+├─ BUILTIN_SHEETS_SYSTEM.md    # Read-only sheets system
+├─ RECRUITER_ACCESS.md         # Recruiter flows
+└─ README.md
+```
 
+## 🚀 Quick Start
 
-🎨 Current Features
+1) Backend API
 
-Homepage Sections
-
-Hero Section – Compelling introduction with call-to-action buttons
-
-Problem Statement – Clear explanation of the challenges we solve
-
-Key Features – Six core features with icons and descriptions
-
-How It Works – 4-step process explanation
-
-Benefits – Impact for students, faculty, and institutions
-
-Call-to-Action – Final conversion section
-
-Footer – Contact information and links
-
-Design Highlights
-
-Modern gradient backgrounds
-
-Responsive design for all screen sizes
-
-Professional blue/indigo theme
-
-Clear typography hierarchy
-
-Interactive hover effects
-
-Accessible navigation
-
-🚀 Getting Started
-
-Install Dependencies
-
+```bash
+cd backend
 npm install
-
-
-Start Development Server
-
+cp env.example .env   # or create .env as per DATABASE_SETUP.md / SETUP_GUIDE.md
 npm run dev
+# API at http://localhost:5000; health: http://localhost:5000/health
+```
 
+2) Frontend
 
-Open Browser
-Navigate to http://localhost:3000
+```bash
+cd smart-student-hub
+npm install
+npm run dev
+# App at http://localhost:3000
+```
 
-📋 Next Steps
+See `SETUP_GUIDE.md` for step-by-step instructions, troubleshooting, and role-based testing.
 
-Phase 1: Backend Setup
+## 🔐 Environment
 
-Initialize Node.js/Express backend
+Create `backend/.env` using `backend/env.example` or `DATABASE_SETUP.md`:
 
-Set up PostgreSQL database
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=smart_student_hub
+DB_USER=postgres
+DB_PASSWORD=your_password
+JWT_SECRET=your_super_secret_jwt_key_here
+JWT_EXPIRES_IN=7d
+PORT=5000
+NODE_ENV=development
+MAX_FILE_SIZE=10485760
+UPLOAD_PATH=./uploads
+```
 
-Configure JWT authentication
+## 📜 NPM Scripts
 
-Create API endpoints
+Frontend (root `package.json`):
+- dev: `next dev --turbopack`
+- build: `next build --turbopack`
+- start: `next start`
+- lint: `eslint`
 
-Phase 2: Authentication System
+Backend (`backend/package.json`):
+- dev: `nodemon server.js`
+- start: `node server.js`
+- seed: `npm run seed:users`
+- test webhook: `npm run test:webhook`
 
-Student registration/login
+## 🧱 Key Features
 
-Faculty/admin authentication
+- Authentication & roles: student, faculty, admin, recruiter
+- Student activities: submission, certificate upload, status tracking
+- Faculty approvals with automatic sheet updates
+- Admin management: users, categories, reports
+- Recruiter access to professional, read-only activity sheets
 
-Role-based access control
+## 🗂️ Built-in Sheets (Read-only)
 
-Password reset functionality
+The app ships with a shareable, non-editable sheet per student. No Google setup required.
+- API docs and schema: see `BUILTIN_SHEETS_SYSTEM.md`
+- Public viewer route: `/sheet/[shareToken]`
+- Example URLs in the docs
 
-Phase 3: Core Features
+## 📘 Documentation
 
-Student dashboard
+- End-to-end setup: `SETUP_GUIDE.md`
+- Database setup: `DATABASE_SETUP.md`
+- Built-in Sheets: `BUILTIN_SHEETS_SYSTEM.md`
+- Recruiter guide: `RECRUITER_ACCESS.md`
+- Backend API overview: `backend/README.md`
 
-Activity upload system
+## 🧪 Testing the Flow
 
-Faculty approval workflow
+1. Start backend and frontend
+2. Register roles at `/register` and login at `/login`
+3. Use `npm run test:webhook` in `backend` to seed example activity flow
+4. Visit student profiles and shared sheet pages
 
-Portfolio generation
+## 🚢 Deployment
 
-Phase 4: Advanced Features
+- Frontend: build via `npm run build`, serve with `next start`
+- Backend: set `NODE_ENV=production`, use a managed Postgres, strong JWT secret, PM2 or similar
+- Configure reverse proxy (nginx) and HTTPS
 
-Analytics and reporting
+## 🤝 Contributing
 
-LMS/ERP integration
+Issues and PRs are welcome. Please keep code readable and follow TypeScript/ESLint recommendations.
 
-Mobile app development
+---
 
-Performance optimization
-
-🎯 Target Users
-
-Students
-
-Upload achievements and activities
-
-Track academic progress
-
-Generate verified portfolios
-
-Apply for placements/scholarships
-
-Faculty
-
-Review and approve student records
-
-Monitor student progress
-
-Generate reports
-
-Provide mentoring support
-
-Institutions
-
-Streamline accreditation processes
-
-Generate compliance reports
-
-Track institutional metrics
-
-Enhance reputation
-
-📊 Impact & Benefits
-
-For Students
-
-Verified holistic digital profile
-
-Better placement opportunities
-
-Streamlined scholarship applications
-
-Career planning support
-
-For Faculty
-
-Real-time student tracking
-
-Simplified approval process
-
-Enhanced mentoring capabilities
-
-Reduced administrative workload
-
-For Institutions
-
-Streamlined accreditation process
-
-Data-driven decision making
-
-Reduced paperwork and errors
-
-Enhanced institutional reputation
-
-🤝 Contributing
-This project is part of a Smart India Hackathon solution. Contributions are welcome for:
-
-Frontend improvements
-
-Backend development
-
-Database design
-
-Testing and documentation
-
-📄 License
-This project is developed for educational purposes as part of the Smart India Hackathon.
+Smart Student Hub — transforming scattered student records into verified, shareable achievements.

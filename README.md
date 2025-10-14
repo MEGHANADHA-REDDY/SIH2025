@@ -126,10 +126,6 @@ The app ships with a shareable, non-editable sheet per student. No Google setup 
 - Backend: set `NODE_ENV=production`, use a managed Postgres, strong JWT secret, PM2 or similar
 - Configure reverse proxy (nginx) and HTTPS
 
-## 🤝 Contributing
 
-Issues and PRs are welcome. Please keep code readable and follow TypeScript/ESLint recommendations.
-
----
 
 Smart Student Hub — transforming scattered student records into verified, shareable achievements.

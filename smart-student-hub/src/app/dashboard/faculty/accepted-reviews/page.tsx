@@ -15,6 +15,7 @@ import {
   Search,
   Filter
 } from 'lucide-react'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface ApprovedActivity {
   id: number
@@ -59,7 +60,7 @@ export default function AcceptedReviewsPage() {
   const fetchApprovedActivities = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/faculty/approved-activities', {
+      const response = await fetch(apiUrl('/api/faculty/approved-activities'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -258,7 +259,7 @@ export default function AcceptedReviewsPage() {
                   <div className="flex space-x-3">
                     {activity.certificate_url && (
                       <a
-                        href={`http://localhost:5000${activity.certificate_url}`}
+                        href={apiAssetUrl(activity.certificate_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -269,7 +270,7 @@ export default function AcceptedReviewsPage() {
                     )}
                     {(activity as any).image_url && (
                       <a
-                        href={`http://localhost:5000${(activity as any).image_url}`}
+                        href={apiAssetUrl((activity as any).image_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"

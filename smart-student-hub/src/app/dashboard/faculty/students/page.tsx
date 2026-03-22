@@ -24,6 +24,7 @@ import {
   TrendingUp,
   Clock
 } from 'lucide-react'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface Student {
   id: number
@@ -78,7 +79,7 @@ export default function FacultyStudentsPage() {
         return
       }
 
-      const response = await fetch('http://localhost:5000/api/faculty/students-simple', {
+      const response = await fetch(apiUrl('/api/faculty/students-simple'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -139,7 +140,7 @@ export default function FacultyStudentsPage() {
   const downloadResume = (resumeUrl: string, studentName: string) => {
     if (resumeUrl) {
       const link = document.createElement('a')
-      link.href = `http://localhost:5000${resumeUrl}`
+      link.href = apiAssetUrl(resumeUrl)
       link.download = `${studentName}_Resume.pdf`
       link.target = '_blank'
       document.body.appendChild(link)

@@ -21,7 +21,7 @@ import {
   Check,
   MessageSquare
 } from 'lucide-react'
-import { apiUrl } from '@/lib/api'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface Activity {
   id: number
@@ -458,7 +458,7 @@ export default function FacultyDashboard() {
                         <div className="flex space-x-3">
                           {activity.certificate_url && (
                             <a
-                              href={`http://localhost:5000${activity.certificate_url}`}
+                              href={apiAssetUrl(activity.certificate_url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium"
@@ -469,7 +469,7 @@ export default function FacultyDashboard() {
                           )}
                           {activity.image_url && (
                             <a
-                              href={`http://localhost:5000${activity.image_url}`}
+                              href={apiAssetUrl(activity.image_url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center text-green-600 hover:text-green-700 text-sm font-medium"
@@ -662,7 +662,7 @@ export default function FacultyDashboard() {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Certificate</h3>
                     <a
-                      href={`http://localhost:5000${selectedActivity.certificate_url}`}
+                      href={apiAssetUrl(selectedActivity.certificate_url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors"

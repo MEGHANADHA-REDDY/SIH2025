@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from 'react'
 import { ArrowLeft, Download } from 'lucide-react'
 import Link from 'next/link'
+import { apiUrl } from '@/lib/api'
 
 interface SharedPortfolioPageProps {
   params: Promise<{ token: string }>
@@ -18,7 +19,7 @@ export default function SharedPortfolioPage({ params }: SharedPortfolioPageProps
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/students/portfolio/shared/${token}`)
+        const res = await fetch(apiUrl(`/api/students/portfolio/shared/${token}`))
         if (!res.ok) throw new Error('Failed to fetch')
         const json = await res.json()
         setData(json.data)

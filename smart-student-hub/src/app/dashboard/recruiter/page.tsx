@@ -22,6 +22,7 @@ import {
   Github,
   Globe
 } from 'lucide-react'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface JobApplication {
   id: number
@@ -117,7 +118,7 @@ export default function RecruiterDashboard() {
       setIsLoading(true)
       
       // Fetch job postings for this recruiter
-      const jobPostingsResponse = await fetch('http://localhost:5000/api/jobs/recruiter-postings', {
+      const jobPostingsResponse = await fetch(apiUrl('/api/jobs/recruiter-postings'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -143,7 +144,7 @@ export default function RecruiterDashboard() {
 
   const fetchJobApplications = async (token: string, jobId: number) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/jobs/applications/${jobId}`, {
+      const response = await fetch(apiUrl(`/api/jobs/applications/${jobId}`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -169,7 +170,7 @@ export default function RecruiterDashboard() {
   const handleApplicationStatusUpdate = async (applicationId: number, newStatus: string) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/jobs/update-application-status`, {
+      const response = await fetch(apiUrl('/api/jobs/update-application-status'), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -215,7 +216,7 @@ export default function RecruiterDashboard() {
       const studentId = application.student_id
       const applicationId = application.id
       
-      const response = await fetch(`http://localhost:5000/api/jobs/student-profile/${studentId}/${applicationId}`, {
+      const response = await fetch(apiUrl(`/api/jobs/student-profile/${studentId}/${applicationId}`), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -241,9 +242,7 @@ export default function RecruiterDashboard() {
     if (resumeUrl) {
       // Create a temporary link to download the file
       const link = document.createElement('a')
-      // Remove leading slash if present to avoid double slashes
-      const cleanUrl = resumeUrl.startsWith('/') ? resumeUrl.substring(1) : resumeUrl
-      link.href = `http://localhost:5000/${cleanUrl}`
+      link.href = apiAssetUrl(resumeUrl)
       link.download = `${studentName}_Resume.pdf`
       document.body.appendChild(link)
       link.click()
@@ -517,7 +516,7 @@ export default function RecruiterDashboard() {
                   <h4 className="font-medium text-gray-900 mb-3">Resume</h4>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <a
-                      href={`http://localhost:5000/${selectedApplication.resume_url.startsWith('/') ? selectedApplication.resume_url.substring(1) : selectedApplication.resume_url}`}
+                      href={apiAssetUrl(selectedApplication.resume_url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center text-blue-600 hover:text-blue-700"

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { GraduationCap, User, FileText, Code, Upload, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 export default function StudentDetailsPage() {
   const [studentData, setStudentData] = useState<any>(null)
@@ -118,7 +119,7 @@ export default function StudentDetailsPage() {
         submitData.append('resume', formData.resume)
       }
 
-      const response = await fetch('http://localhost:5000/api/students/complete-profile', {
+      const response = await fetch(apiUrl('/api/students/complete-profile'), {
         method: 'POST',
         body: submitData,
       })

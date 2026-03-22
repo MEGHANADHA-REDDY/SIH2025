@@ -25,6 +25,7 @@ import {
   CheckCircle,
   ExternalLink
 } from 'lucide-react'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface StudentPortfolio {
   // Student Info
@@ -89,7 +90,7 @@ export default function PortfolioPage({ params }: { params: Promise<{ studentId:
     try {
       const token = localStorage.getItem('token')
       
-      const response = await fetch(`http://localhost:5000/api/students/portfolio/${resolvedParams.studentId}`, {
+      const response = await fetch(apiUrl(`/api/students/portfolio/${resolvedParams.studentId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -225,7 +226,7 @@ export default function PortfolioPage({ params }: { params: Promise<{ studentId:
                     <FileText className="h-8 w-8 text-green-600" />
                   </div>
                   <a
-                    href={`http://localhost:5000${portfolio.resume_url}`}
+                    href={apiAssetUrl(portfolio.resume_url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-green-600 text-white px-4 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center font-medium"
@@ -392,7 +393,7 @@ export default function PortfolioPage({ params }: { params: Promise<{ studentId:
                       {activity.certificate_url && (
                         <div className="border-t border-gray-100 pt-4">
                           <a
-                            href={`http://localhost:5000${activity.certificate_url}`}
+                            href={apiAssetUrl(activity.certificate_url)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium"

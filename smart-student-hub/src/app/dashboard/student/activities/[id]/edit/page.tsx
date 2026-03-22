@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { GraduationCap, User, LogOut, ArrowLeft, Upload, AlertCircle, CheckCircle, Calendar, Building, FileText } from 'lucide-react'
 import Link from 'next/link'
+import { apiUrl } from '@/lib/api'
 
 interface ActivityCategory {
   id: number;
@@ -77,7 +78,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
 
   const fetchActivityDetails = async (token: string, activityId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/activities/${activityId}`, {
+      const response = await fetch(apiUrl(`/api/activities/${activityId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -112,7 +113,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
 
   const fetchActivityCategories = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/students/activity-categories', {
+      const response = await fetch(apiUrl('/api/students/activity-categories'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -186,7 +187,7 @@ export default function EditActivityPage({ params }: { params: Promise<{ id: str
         formDataToSend.append('certificate', formData.certificate)
       }
 
-      const response = await fetch(`http://localhost:5000/api/activities/${resolvedParams.id}`, {
+      const response = await fetch(apiUrl(`/api/activities/${resolvedParams.id}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Edit
 } from 'lucide-react'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface ActivityDetails {
   id: number
@@ -76,7 +77,7 @@ export default function ActivityDetailsPage({ params }: { params: Promise<{ id: 
 
   const fetchActivityDetails = async (token: string, activityId: string) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/activities/${activityId}`, {
+      const response = await fetch(apiUrl(`/api/activities/${activityId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -102,7 +103,7 @@ export default function ActivityDetailsPage({ params }: { params: Promise<{ id: 
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/activities/${resolvedParams.id}`, {
+      const response = await fetch(apiUrl(`/api/activities/${resolvedParams.id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -360,7 +361,7 @@ export default function ActivityDetailsPage({ params }: { params: Promise<{ id: 
                       <p className="text-xs text-gray-500">Click to view or download</p>
                     </div>
                     <a
-                      href={`http://localhost:5000${activity.certificate_url}`}
+                      href={apiAssetUrl(activity.certificate_url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center space-x-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -377,8 +378,8 @@ export default function ActivityDetailsPage({ params }: { params: Promise<{ id: 
                 <div className="border-t border-gray-200 pt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">Activity Image</h3>
                   <div className="bg-gray-50 rounded-lg p-3">
-                    <a href={`http://localhost:5000${activity.image_url}`} target="_blank" rel="noopener noreferrer">
-                      <img src={`http://localhost:5000${activity.image_url}`} alt="Activity Image" className="max-h-80 rounded-md object-contain mx-auto" />
+                    <a href={apiAssetUrl(activity.image_url)} target="_blank" rel="noopener noreferrer">
+                      <img src={apiAssetUrl(activity.image_url)} alt="Activity Image" className="max-h-80 rounded-md object-contain mx-auto" />
                     </a>
                   </div>
                 </div>

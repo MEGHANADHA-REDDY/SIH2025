@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import StudentSheetViewer from '../../../components/StudentSheetViewer'
+import { apiUrl, apiAssetUrl } from '@/lib/api'
 
 interface StudentProfile {
   id: number
@@ -80,7 +81,7 @@ export default function StudentProfilePage({ params }: { params: Promise<{ stude
     try {
       const token = localStorage.getItem('token')
       
-      const response = await fetch(`http://localhost:5000/api/students/profile/${resolvedParams.studentId}`, {
+      const response = await fetch(apiUrl(`/api/students/profile/${resolvedParams.studentId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -158,7 +159,7 @@ export default function StudentProfilePage({ params }: { params: Promise<{ stude
                   onClick={async () => {
                     try {
                       const token = localStorage.getItem('token')
-                      const res = await fetch('http://localhost:5000/api/students/portfolio/share', {
+                      const res = await fetch(apiUrl('/api/students/portfolio/share'), {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}` }
                       })
@@ -281,7 +282,7 @@ export default function StudentProfilePage({ params }: { params: Promise<{ stude
               {profile.resume_url && (
                 <div className="p-6">
                   <a
-                    href={`http://localhost:5000${profile.resume_url}`}
+                    href={apiAssetUrl(profile.resume_url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"

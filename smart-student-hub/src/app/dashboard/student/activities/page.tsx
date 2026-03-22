@@ -17,6 +17,7 @@ import {
   XCircle,
   ArrowLeft
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 interface Activity {
   id: number
@@ -76,7 +77,7 @@ export default function AllActivitiesPage() {
 
   const fetchActivities = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/students/activities', {
+      const response = await fetch(apiUrl('/api/students/activities'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -96,7 +97,7 @@ export default function AllActivitiesPage() {
 
   const fetchCategories = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/students/activity-categories', {
+      const response = await fetch(apiUrl('/api/students/activity-categories'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

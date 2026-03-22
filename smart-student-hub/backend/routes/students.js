@@ -577,7 +577,8 @@ router.post('/portfolio/share', auth, isStudent, async (req, res) => {
     const studentId = studentResult.rows[0].id;
 
     const token = jwt.sign({ studentId }, process.env.JWT_SECRET, { expiresIn: '30d' });
-    res.json({ message: 'Share token created', data: { token, url: `${req.protocol}://${req.get('host').replace(':5000', ':3000')}/portfolio/shared/${token}` } });
+    const frontendBase = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+    res.json({ message: 'Share token created', data: { token, url: `${frontendBase}/portfolio/shared/${token}` } });
   } catch (error) {
     console.error('Share token error:', error);
     res.status(500).json({ message: 'Internal server error while creating share token' });

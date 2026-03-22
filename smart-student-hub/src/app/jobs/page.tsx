@@ -14,6 +14,7 @@ import {
   Eye,
   ArrowLeft
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 interface JobPosting {
   id: number
@@ -69,7 +70,7 @@ export default function JobsPage() {
   const fetchJobs = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:5000/api/jobs/active')
+      const response = await fetch(apiUrl('/api/jobs/active'))
       
       if (response.ok) {
         const data = await response.json()
@@ -85,7 +86,7 @@ export default function JobsPage() {
   const fetchMyApplications = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/jobs/my-applications', {
+      const response = await fetch(apiUrl('/api/jobs/my-applications'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -108,7 +109,7 @@ export default function JobsPage() {
   const handleSubmitApplication = async (applicationData: any) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/jobs/${selectedJob?.id}/apply`, {
+      const response = await fetch(apiUrl(`/api/jobs/${selectedJob?.id}/apply`), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

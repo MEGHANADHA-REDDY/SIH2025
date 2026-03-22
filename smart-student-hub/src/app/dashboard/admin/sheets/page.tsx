@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, ExternalLink, Users, TrendingUp, CheckCircle, XCircle } from 'lucide-react';
+import { apiUrl } from '@/lib/api';
 
 interface Sheet {
   id: number;
@@ -71,7 +72,7 @@ export default function AdminSheetsPage() {
   const fetchData = async (token: string) => {
     try {
       // Fetch all sheets
-      const sheetsResponse = await fetch('http://localhost:5000/api/sheets/all', {
+      const sheetsResponse = await fetch(apiUrl('/api/sheets/all'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -79,7 +80,7 @@ export default function AdminSheetsPage() {
       });
 
       // Fetch statistics
-      const statsResponse = await fetch('http://localhost:5000/api/sheets/stats', {
+      const statsResponse = await fetch(apiUrl('/api/sheets/stats'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

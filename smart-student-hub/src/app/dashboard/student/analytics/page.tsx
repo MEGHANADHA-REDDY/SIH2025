@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Share2, TrendingUp } from 'lucide-react'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, BarElement } from 'chart.js'
 import { Pie, Line, Bar } from 'react-chartjs-2'
+import { apiUrl } from '@/lib/api'
 
 ChartJS.register(ArcElement, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, BarElement)
 
@@ -49,7 +50,7 @@ export default function StudentAnalyticsPage() {
 
   const fetchActivities = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/students/activities', {
+      const response = await fetch(apiUrl('/api/students/activities'), {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       if (response.ok) {

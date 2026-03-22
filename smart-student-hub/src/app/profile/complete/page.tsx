@@ -19,6 +19,7 @@ import {
   FileText,
   ArrowRight
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 interface StudentProfile {
   id: number
@@ -90,7 +91,7 @@ export default function CompleteProfilePage() {
   const fetchStudentProfile = async () => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/students/profile/${currentUser?.studentId}`, {
+      const response = await fetch(apiUrl(`/api/students/profile/${currentUser?.studentId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -169,7 +170,7 @@ export default function CompleteProfilePage() {
         formDataToSend.append('resume', formData.resume)
       }
 
-      const response = await fetch(`http://localhost:5000/api/students/profile/${currentUser?.studentId}`, {
+      const response = await fetch(apiUrl(`/api/students/profile/${currentUser?.studentId}`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

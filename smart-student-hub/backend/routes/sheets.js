@@ -219,14 +219,16 @@ router.get('/share-url', auth, isStudent, async (req, res) => {
     
     // Get or create sheet
     const sheet = await builtinSheetsService.getStudentSheet(studentDbId);
-    
+    const host = `${req.protocol}://${req.get('host')}`;
+    const frontendBase = (process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+
     res.json({
       success: true,
       message: 'Share URL retrieved successfully',
       data: {
         share_token: sheet.share_token,
-        share_url: `${req.protocol}://${req.get('host')}/api/sheets/shared/${sheet.share_token}`,
-        web_url: `${req.protocol}://${req.get('host').replace(':5000', ':3000')}/sheet/${sheet.share_token}`
+        share_url: `${host}/api/sheets/shared/${sheet.share_token}`,
+        web_url: `${frontendBase}/sheet/${sheet.share_token}`
       }
     });
 

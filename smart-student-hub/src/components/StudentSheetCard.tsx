@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Copy, ExternalLink, RefreshCw } from 'lucide-react';
+import { apiUrl } from '@/lib/api';
 
 interface StudentSheetCardProps {
   token?: string; // JWT token for authenticated requests
@@ -18,7 +19,7 @@ export default function StudentSheetCard({ token }: StudentSheetCardProps) {
 
   const fetchShareUrl = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/sheets/share-url', {
+      const response = await fetch(apiUrl('/api/sheets/share-url'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -49,7 +50,7 @@ export default function StudentSheetCard({ token }: StudentSheetCardProps) {
   const regenerateToken = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/sheets/regenerate-token', {
+      const response = await fetch(apiUrl('/api/sheets/regenerate-token'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

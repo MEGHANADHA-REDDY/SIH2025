@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { apiUrl } from '@/lib/api';
 
 interface SheetEntry {
   id: number;
@@ -47,7 +48,7 @@ export default function SharedSheetPage() {
   useEffect(() => {
     const fetchSheetData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/sheets/shared/${shareToken}`);
+        const response = await fetch(apiUrl(`/api/sheets/shared/${shareToken}`));
         const data = await response.json();
 
         if (data.success) {

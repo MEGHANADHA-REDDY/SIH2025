@@ -14,6 +14,7 @@ import {
   CheckCircle,
   ArrowLeft
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 interface ActivityCategory {
   id: number
@@ -68,7 +69,7 @@ export default function AddActivityPage() {
 
   const fetchCategories = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/students/activity-categories', {
+      const response = await fetch(apiUrl('/api/students/activity-categories'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -175,7 +176,7 @@ export default function AddActivityPage() {
         formDataToSend.append('image', selectedImage)
       }
 
-      const response = await fetch('http://localhost:5000/api/activities/upload', {
+      const response = await fetch(apiUrl('/api/activities/upload'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

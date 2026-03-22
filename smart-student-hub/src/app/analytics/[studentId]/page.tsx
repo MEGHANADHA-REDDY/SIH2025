@@ -5,6 +5,7 @@ import { ArrowLeft, Share2, TrendingUp } from 'lucide-react'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, BarElement } from 'chart.js'
 import { Pie, Line, Bar } from 'react-chartjs-2'
 import Link from 'next/link'
+import { apiUrl } from '@/lib/api'
 
 ChartJS.register(ArcElement, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, BarElement)
 
@@ -22,7 +23,7 @@ export default function PublicAnalyticsPage({ params }: PublicAnalyticsPageProps
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/students/analytics/${studentId}`)
+        const res = await fetch(apiUrl(`/api/students/analytics/${studentId}`))
         if (!res.ok) throw new Error('Failed to fetch')
         const json = await res.json()
         setData(json.data)

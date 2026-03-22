@@ -17,6 +17,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
+import { apiUrl } from '@/lib/api'
 
 interface Student {
   id: number
@@ -76,7 +77,7 @@ export default function SuperAdminDashboard() {
     setIsLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/students', {
+      const response = await fetch(apiUrl('/api/admin-management/students'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -97,7 +98,7 @@ export default function SuperAdminDashboard() {
     setIsLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/faculty', {
+      const response = await fetch(apiUrl('/api/admin-management/faculty'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -117,7 +118,7 @@ export default function SuperAdminDashboard() {
   const handleCreateStudent = async (studentData: any) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/create-student', {
+      const response = await fetch(apiUrl('/api/admin-management/create-student'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +145,7 @@ export default function SuperAdminDashboard() {
   const handleCreateFaculty = async (facultyData: any) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/create-faculty', {
+      const response = await fetch(apiUrl('/api/admin-management/create-faculty'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

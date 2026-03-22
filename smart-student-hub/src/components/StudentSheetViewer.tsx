@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ExternalLink, Eye, TrendingUp, CheckCircle, XCircle, Calendar } from 'lucide-react';
+import { apiUrl } from '@/lib/api';
 
 interface SheetEntry {
   id: number;
@@ -57,7 +58,7 @@ export default function StudentSheetViewer({ studentId, token, userRole }: Stude
 
   const fetchSheetData = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/sheets/student/${studentId}`, {
+      const response = await fetch(apiUrl(`/api/sheets/student/${studentId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

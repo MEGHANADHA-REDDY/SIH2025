@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, GraduationCap, Mail, Lock, AlertCircle, ArrowLeft } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ export default function LoginPage() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(apiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

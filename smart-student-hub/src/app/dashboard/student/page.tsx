@@ -20,6 +20,7 @@ import {
   Briefcase
 } from 'lucide-react'
 // import StudentSheetCard from '../../../components/StudentSheetCard'
+import { apiUrl } from '@/lib/api'
 
 interface Activity {
   id: number
@@ -83,7 +84,7 @@ export default function StudentDashboard() {
 
   const fetchDashboardData = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/students/dashboard', {
+      const response = await fetch(apiUrl('/api/students/dashboard'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

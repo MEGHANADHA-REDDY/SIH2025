@@ -15,6 +15,7 @@ import {
 import { useMemo } from 'react'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, BarElement } from 'chart.js'
 import { Pie, Line, Bar } from 'react-chartjs-2'
+import { apiUrl } from '@/lib/api'
 
 ChartJS.register(ArcElement, Tooltip, Legend, LineElement, PointElement, CategoryScale, LinearScale, BarElement)
 
@@ -76,7 +77,7 @@ export default function AdminDashboard() {
     setIsLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/recruiters', {
+      const response = await fetch(apiUrl('/api/admin-management/recruiters'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -97,7 +98,7 @@ export default function AdminDashboard() {
     setIsLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/job-postings', {
+      const response = await fetch(apiUrl('/api/admin-management/job-postings'), {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -118,7 +119,7 @@ export default function AdminDashboard() {
   const handleCreateJobPosting = async (jobData: any) => {
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/admin-management/create-job-posting', {
+      const response = await fetch(apiUrl('/api/admin-management/create-job-posting'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -426,7 +427,7 @@ function AdminAnalyticsPanel() {
       if (department) params.set('department', department)
       if (startDate) params.set('startDate', startDate)
       if (endDate) params.set('endDate', endDate)
-      const res = await fetch(`http://localhost:5000/api/admin/reports?${params.toString()}`, {
+      const res = await fetch(apiUrl(`/api/admin/reports?${params.toString()}`), {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       const json = await res.json()
@@ -446,7 +447,7 @@ function AdminAnalyticsPanel() {
       if (department) params.set('department', department)
       if (startDate) params.set('startDate', startDate)
       if (endDate) params.set('endDate', endDate)
-      const res = await fetch(`http://localhost:5000/api/admin/reports/export?${params.toString()}`, {
+      const res = await fetch(apiUrl(`/api/admin/reports/export?${params.toString()}`), {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       const blob = await res.blob()
@@ -469,7 +470,7 @@ function AdminAnalyticsPanel() {
       const email = prompt('Enter email to receive report:') || ''
       const cronExpr = prompt('Enter CRON (e.g., 0 8 * * 1 for Mondays 8am):') || ''
       if (!email || !cronExpr) return
-      const res = await fetch('http://localhost:5000/api/admin/reports/schedule', {
+      const res = await fetch(apiUrl('/api/admin/reports/schedule'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ cronExpr, type, department, startDate, endDate, email })
@@ -635,7 +636,7 @@ function MonthlyTrendsChart() {
     const load = async () => {
       try {
         const token = localStorage.getItem('token')
-        const res = await fetch('http://localhost:5000/api/admin/dashboard', { headers: { 'Authorization': `Bearer ${token}` } })
+        const res = await fetch(apiUrl('/api/admin/dashboard'), { headers: { 'Authorization': `Bearer ${token}` } })
         const json = await res.json()
         const rows = json?.data?.monthlyTrends || []
         setSeries({

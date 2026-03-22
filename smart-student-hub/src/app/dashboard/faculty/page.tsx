@@ -21,6 +21,7 @@ import {
   Check,
   MessageSquare
 } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 interface Activity {
   id: number
@@ -98,7 +99,7 @@ export default function FacultyDashboard() {
 
   const fetchDashboardData = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/faculty/dashboard', {
+      const response = await fetch(apiUrl('/api/faculty/dashboard'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -136,7 +137,7 @@ export default function FacultyDashboard() {
     setIsProcessing(true)
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`http://localhost:5000/api/activities/${selectedActivity.id}/approve`, {
+      const response = await fetch(apiUrl(`/api/activities/${selectedActivity.id}/approve`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

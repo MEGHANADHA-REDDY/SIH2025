@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { GraduationCap, User, Mail, Phone, Building, Calendar, LogOut, Edit } from 'lucide-react'
+import { apiUrl } from '@/lib/api'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
@@ -32,7 +33,7 @@ export default function ProfilePage() {
 
   const fetchProfile = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
+      const response = await fetch(apiUrl('/api/auth/profile'), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

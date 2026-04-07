@@ -224,20 +224,8 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Demo Accounts */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Working Credentials</h3>
-          <div className="text-xs text-blue-700 space-y-1">
-            <div><strong>Super Admin:</strong> superadmin@smarthub.edu / admin123</div>
-            <div><strong>Normal Admin:</strong> admin@smarthub.edu / admin123</div>
-            <div><strong>Student:</strong> megha@gmail.com / password123</div>
-            <div><strong>Faculty:</strong> meghaf@gmail.com / password123</div>
-            <div><strong>Faculty:</strong> monkeydluffy6823140@gmail.com / password123</div>
-            <div><strong>Admin:</strong> meghaa@gmail.com / password123</div>
-          </div>
-          </div>
-        </div>
       </div>
+    </div>
     </div>
   )
 }

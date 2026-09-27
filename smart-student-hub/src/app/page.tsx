@@ -23,7 +23,7 @@ import {
   Play,
   ChevronDown
 } from 'lucide-react'
-import heroImage from '../images/WhatsApp Image 2025-09-15 at 23.14.22_0ed1ac71.jpg'
+import heroImage from '../images/hero.jpg'
 import { FeaturesSectionWithHoverEffects } from '@/components/ui/feature-section-with-hover-effects'
 
 export default function HomePage() {

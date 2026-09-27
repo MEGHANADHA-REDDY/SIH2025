@@ -1,26 +1,46 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 
-// Database configuration function
-const getDbConfig = () => ({
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || 'smart_student_hub',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-  connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
-});
+// Default super admin, created on first startup
+const SUPER_ADMIN = {
+  email: 'superadmin@smarthub.edu',
+  password: 'SuperAdmin@123',
+  firstName: 'Super',
+  lastName: 'Admin',
+};
 
-// Create connection pool
-const pool = new Pool(getDbConfig());
+// SSL: DB_SSL=true|false wins; otherwise on in production (managed Postgres), off locally
+const getSslConfig = () => {
+  const flag = process.env.DB_SSL;
+  const enabled = flag ? flag === 'true' : process.env.NODE_ENV === 'production';
+  return enabled ? { rejectUnauthorized: false } : false;
+};
 
-// Handle pool errors
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
-  process.exit(-1);
-});
+// Database configuration function. DATABASE_URL (as given by Neon/Render/Railway/Supabase) takes precedence.
+const getDbConfig = () => {
+  const common = {
+    ssl: getSslConfig(),
+    max: parseInt(process.env.DB_POOL_MAX) || 20, // Maximum number of clients in the pool
+    idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+    connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
+  };
+
+  if (process.env.DATABASE_URL) {
+    return { connectionString: process.env.DATABASE_URL, ...common };
+  }
+
+  return {
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT) || 5432,
+    database: process.env.DB_NAME || 'smart_student_hub',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD,
+    ...common,
+  };
+};
+
+// Shared connection pool, created lazily so it picks up env vars loaded after this module is required
+let sharedPool = null;
 
 // Test database connection
 const testConnection = async () => {
@@ -33,7 +53,7 @@ const testConnection = async () => {
     await testPool.end();
   } catch (err) {
     console.error('❌ Database connection failed:', err.message);
-    process.exit(1);
+    throw err;
   }
 };
 
@@ -293,6 +313,19 @@ const initializeDatabase = async () => {
       ON CONFLICT (name) DO NOTHING
     `);
 
+    // Ensure the default super admin exists. Only inserted when missing, so a changed password is kept.
+    const superAdminPassword = await bcrypt.hash(SUPER_ADMIN.password, 12);
+    const superAdminResult = await client.query(
+      `INSERT INTO users (email, password, role, first_name, last_name)
+       VALUES ($1, $2, 'super_admin', $3, $4)
+       ON CONFLICT (email) DO NOTHING
+       RETURNING id`,
+      [SUPER_ADMIN.email, superAdminPassword, SUPER_ADMIN.firstName, SUPER_ADMIN.lastName]
+    );
+    if (superAdminResult.rows.length > 0) {
+      console.log(`✅ Default super admin created: ${SUPER_ADMIN.email}`);
+    }
+
     console.log('✅ Database tables initialized successfully');
     client.release();
     await initPool.end();
@@ -302,12 +335,28 @@ const initializeDatabase = async () => {
   }
 };
 
-// Function to get a fresh pool with current environment variables
-const getPool = () => new Pool(getDbConfig());
+// Return the shared pool. Creating a pool per request exhausts Postgres max_connections under load.
+const getPool = () => {
+  if (!sharedPool) {
+    sharedPool = new Pool(getDbConfig());
+    sharedPool.on('error', (err) => {
+      console.error('Unexpected error on idle client', err);
+    });
+  }
+  return sharedPool;
+};
+
+// Close the shared pool (used on graceful shutdown)
+const closePool = async () => {
+  if (sharedPool) {
+    await sharedPool.end();
+    sharedPool = null;
+  }
+};
 
 module.exports = {
-  pool,
   getPool,
+  closePool,
   testConnection,
   initializeDatabase
 };

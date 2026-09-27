@@ -7,6 +7,7 @@ const router = express.Router();
 // Generate portfolio
 router.post('/generate', auth, isStudent, async (req, res) => {
   try {
+    const pool = getPool();
     const userId = req.user.userId;
     const { title, description, isPublic = false } = req.body;
 
@@ -65,6 +66,7 @@ router.post('/generate', auth, isStudent, async (req, res) => {
 // Get portfolio by share token (public access)
 router.get('/share/:token', async (req, res) => {
   try {
+    const pool = getPool();
     const { token } = req.params;
 
     // Get portfolio
@@ -112,6 +114,7 @@ router.get('/share/:token', async (req, res) => {
 // Get student's portfolios
 router.get('/my-portfolios', auth, isStudent, async (req, res) => {
   try {
+    const pool = getPool();
     const userId = req.user.userId;
 
     // Get student ID
@@ -157,6 +160,7 @@ router.get('/my-portfolios', auth, isStudent, async (req, res) => {
 // Update portfolio
 router.put('/:id', auth, isStudent, async (req, res) => {
   try {
+    const pool = getPool();
     const { id } = req.params;
     const userId = req.user.userId;
     const { title, description, isPublic } = req.body;
@@ -205,6 +209,7 @@ router.put('/:id', auth, isStudent, async (req, res) => {
 // Delete portfolio
 router.delete('/:id', auth, isStudent, async (req, res) => {
   try {
+    const pool = getPool();
     const { id } = req.params;
     const userId = req.user.userId;
 
@@ -249,6 +254,7 @@ router.delete('/:id', auth, isStudent, async (req, res) => {
 // Helper function to get portfolio data
 async function getPortfolioData(studentId) {
   try {
+    const pool = getPool();
     // Get student profile
     const studentResult = await pool.query(`
       SELECT s.*, u.first_name, u.last_name, u.email, u.phone

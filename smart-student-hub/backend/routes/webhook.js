@@ -161,7 +161,7 @@ async function getActivityDataForWebhook(activityId) {
     const result = await pool.query(`
       SELECT 
         a.*,
-        s.student_id,
+        s.student_id as student_number,
         u.first_name as student_first_name,
         u.last_name as student_last_name,
         fu.first_name as faculty_first_name,
@@ -185,7 +185,7 @@ async function getActivityDataForWebhook(activityId) {
     return {
       student_name: `${activity.student_first_name} ${activity.student_last_name}`,
       project_url: activity.github_url || activity.certificate_url || '',
-      course_name: activity.category_name || activity.category,
+      course_name: activity.title || activity.category_name || activity.category,
       status: activity.status,
       faculty_name: activity.faculty_first_name && activity.faculty_last_name 
         ? `${activity.faculty_first_name} ${activity.faculty_last_name}` 
@@ -195,8 +195,8 @@ async function getActivityDataForWebhook(activityId) {
       readable_date: activity.approved_at 
         ? new Date(activity.approved_at).toLocaleDateString()
         : new Date().toLocaleDateString(),
-      student_id: activity.student_id,
-      student_db_id: activity.student_id, // This is the database ID from students table
+      student_id: activity.student_number,
+      student_db_id: activity.student_id, // This is the database ID from students table (a.student_id)
       activity_type: activity.activity_type,
       category: activity.category,
       activity_id: activity.id

@@ -225,6 +225,57 @@ router.put('/update-application-status', auth, async (req, res) => {
   }
 });
 
+// Get student's job applications (must be registered before /:jobId)
+router.get('/my-applications', auth, async (req, res) => {
+  try {
+    // Check if user is a student
+    if (req.user.role !== 'student') {
+      return res.status(403).json({
+        message: 'Only students can view their applications'
+      });
+    }
+
+    const pool = getPool();
+
+    // Get student ID
+    const studentResult = await pool.query(
+      'SELECT id FROM students WHERE user_id = $1',
+      [req.user.userId]
+    );
+
+    if (studentResult.rows.length === 0) {
+      return res.status(404).json({
+        message: 'Student profile not found'
+      });
+    }
+
+    const studentId = studentResult.rows[0].id;
+
+    // Get student's applications
+    const result = await pool.query(`
+      SELECT ja.id, ja.cover_letter, ja.resume_url, ja.status, ja.applied_at,
+             jp.title, jp.company, jp.location, jp.job_type, jp.salary_range,
+             r.company as recruiter_company
+      FROM job_applications ja
+      JOIN job_postings jp ON ja.job_posting_id = jp.id
+      JOIN recruiters r ON jp.recruiter_id = r.id
+      WHERE ja.student_id = $1
+      ORDER BY ja.applied_at DESC
+    `, [studentId]);
+
+    res.json({
+      message: 'Job applications retrieved successfully',
+      applications: result.rows
+    });
+
+  } catch (error) {
+    console.error('Job applications retrieval error:', error);
+    res.status(500).json({
+      message: 'Internal server error while retrieving job applications'
+    });
+  }
+});
+
 // Get job posting details (Students can view)
 router.get('/:jobId', async (req, res) => {
   try {
@@ -336,57 +387,6 @@ router.post('/:jobId/apply', auth, async (req, res) => {
     console.error('Job application error:', error);
     res.status(500).json({
       message: 'Internal server error during job application'
-    });
-  }
-});
-
-// Get student's job applications
-router.get('/my-applications', auth, async (req, res) => {
-  try {
-    // Check if user is a student
-    if (req.user.role !== 'student') {
-      return res.status(403).json({
-        message: 'Only students can view their applications'
-      });
-    }
-
-    const pool = getPool();
-
-    // Get student ID
-    const studentResult = await pool.query(
-      'SELECT id FROM students WHERE user_id = $1',
-      [req.user.userId]
-    );
-
-    if (studentResult.rows.length === 0) {
-      return res.status(404).json({
-        message: 'Student profile not found'
-      });
-    }
-
-    const studentId = studentResult.rows[0].id;
-
-    // Get student's applications
-    const result = await pool.query(`
-      SELECT ja.id, ja.cover_letter, ja.resume_url, ja.status, ja.applied_at,
-             jp.title, jp.company, jp.location, jp.job_type, jp.salary_range,
-             r.company as recruiter_company
-      FROM job_applications ja
-      JOIN job_postings jp ON ja.job_posting_id = jp.id
-      JOIN recruiters r ON jp.recruiter_id = r.id
-      WHERE ja.student_id = $1
-      ORDER BY ja.applied_at DESC
-    `, [studentId]);
-
-    res.json({
-      message: 'Job applications retrieved successfully',
-      applications: result.rows
-    });
-
-  } catch (error) {
-    console.error('Job applications retrieval error:', error);
-    res.status(500).json({
-      message: 'Internal server error while retrieving job applications'
     });
   }
 });

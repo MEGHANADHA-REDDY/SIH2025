@@ -90,6 +90,7 @@ router.get('/dashboard', auth, isAdmin, async (req, res) => {
 router.get('/users', auth, isAdmin, async (req, res) => {
   try {
     const { role, page = 1, limit = 10, search } = req.query;
+    const pool = getPool();
 
     // Build query
     let query = `
@@ -187,6 +188,7 @@ router.put('/users/:id/status', auth, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { isActive } = req.body;
+    const pool = getPool();
 
     if (typeof isActive !== 'boolean') {
       return res.status(400).json({
@@ -221,6 +223,7 @@ router.put('/users/:id/status', auth, isAdmin, async (req, res) => {
 // Get activity categories
 router.get('/activity-categories', auth, isAdmin, async (req, res) => {
   try {
+    const pool = getPool();
     const result = await pool.query(`
       SELECT * FROM activity_categories 
       ORDER BY name
@@ -243,6 +246,7 @@ router.get('/activity-categories', auth, isAdmin, async (req, res) => {
 router.post('/activity-categories', auth, isAdmin, async (req, res) => {
   try {
     const { name, description, points } = req.body;
+    const pool = getPool();
 
     if (!name) {
       return res.status(400).json({
@@ -280,6 +284,7 @@ router.put('/activity-categories/:id', auth, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, description, points, isActive } = req.body;
+    const pool = getPool();
 
     const result = await pool.query(`
       UPDATE activity_categories 
@@ -317,6 +322,7 @@ router.put('/activity-categories/:id', auth, isAdmin, async (req, res) => {
 router.delete('/activity-categories/:id', auth, isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
+    const pool = getPool();
 
     // Check if category is being used
     const usageResult = await pool.query(
